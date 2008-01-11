@@ -1,0 +1,36 @@
+#compdef eselect
+#Author: David Durrleman
+#Contributor : Baptiste Daroussin <baptiste.daroussin@gmail.com>
+
+_eselect () {
+  local globopts sedcmd modnames modopts
+
+  globopts=(
+  	"--no-colour[Disable coloured output]" \
+  	"--no-color[Disable coloured output]"
+  		)
+  modnames=(${${${(M)${(f)"$(eselect --no-color list-modules)"}## *}//   */}//  /})
+
+  if ((CURRENT == 2)); then
+    _arguments -s \
+      "$globopts[@]" \
+      "*:portage:_values 'eselect modules' \$modnames[@]" && return 0
+  elif ((CURRENT == 3)); then
+    if [[ $words[2] == --no-colour || $words[2] == --no-color ]]; then
+      _arguments -s \
+        "*:portage:_values 'eselect modules' \$modnames[@]" && return 0
+    elif (( $modnames[(I)$words[2]] )); then
+      modopts=(${${${(M)${(f)"$(eselect --no-color $words[2] usage)"}## *}//   */}//  /})
+      _arguments -s \
+        "*:portage:_values 'eselect $words[2] options' \$modopts[@]" && return 0
+    fi
+  elif ((CURRENT == 4)); then
+    if (( $modnames[(I)$words[3]] )); then
+      modopts=(${${${(M)${(f)"$(eselect --no-color $words[3] usage)"}## *}//   */}//  /})
+      _arguments -s \
+        "*:portage:_values 'eselect $words[3] options' \$modopts[@]" && return 0
+    fi
+  fi
+}
+
+_eselect "$@"
