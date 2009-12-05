@@ -1,7 +1,6 @@
-#compdef qatom qcheck qdepends qfile qgrep qimlate qlist qlop qsearch qsize quse
+#compdef qatom qcheck qdepends qfile qgrep qcache qlist qlop qsearch qsize quse qtbz2 qpkg qxpak
 
-# Author: baptux <baptiste.daroussin@gmail.com>
-#
+#portage-utils-0.19
 #
 local common_args PORTDIR
 var=PORTDIR
@@ -48,7 +47,7 @@ qgrep)
 	{'(--regexp)-e','(-e)--regexp'}'[Use PATTERN as a regular expression]' \
 	'*:pattern::'
 ;;
-qimlate)
+qcache)
 	local arches allarches arch
 	show_archs(){
 		arches=(${(f)"$(<$PORTDIR/profiles/arch.list)"})
@@ -114,7 +113,30 @@ quse)
 	{'(--keywords)-K','(-K)--keywords'}'[Use the KEYWORDS vs IUSE]' \
 	{'(--license)-L','(-L)--license'}'[Use the LICENSE vs IUSE]' \
 	{'(--describe)-D','(-D)--describe'}'[Describe the USE flag]' \
-  {'(--name-only)-N','(-N)--name-only'}'[Only show package name]' \
+ 	{'(--name-only)-N','(-N)--name-only'}'[Only show package name]' \
 	'*:use flag:_gentoo_packages useflag'
+;;
+qtbz2)
+  _arguments -s $common_args \
+  	{'(--join -s --split -t --tarbz2 -x --xpak)-j','(-t --tarbz2 -j -s --split -x --xpak)--join'}'[Join tar.bz2 + xpak into a tbz2]:*:tar.bz2 file and xpak file:_files -g \*.\(tar.bz2\|xpak\)' \
+	{'(--join -j --split -t --tarbz2 -x --xpak)-s','(-t --tarbz2 -j --join -s -x --xpak)--split'}'[Split a tbz2 into a tar.bz2 + xpak]:tbz2 file:_files -g \*.tbz2' \
+	{'(--join -j -s --split --tarbz2 -x --xpak)-t','(--join -j -s --split -t -x --xpak)--tarbz2'}'[Just split the tar.bz2]:tbz2 file:_files -g \*.tbz2' \
+	{'(--join -j -s --split -t --tarbz2 --xpak)-x','(--join -j -s --split -t --tarbz2 -x)--xpak'}'[Just split the xpak]:tbz2 file:_files -g \*.tbz2' \
+	{'(--stdout)-O','(-O)--stdout'}'[Write files to stdout]'
+;;
+qpkg)
+  _arguments -s $common_args \
+  	{'(--pretend)-p','(-p)--pretend'}'[pretend only]' \
+	{'(--pkgdir)-P','(-P)--pkgdir'}'[alternate package directory]:alternate pkgdir:_files -/' \
+	'*:Installed packages:_gentoo_packages installed_versions'
+;;
+qxpak)
+  _arguments -s $common_args \
+        {'(--list --extract -x --create -c)-l','(-l --extract -x --create -c)--list'}'[List the contents of an archive]:xpak archive:_files -g \*.xpak' \
+	{'(--list -l --extract --create -c)-x','(--list -l -x --create -c)--extract'}'[Extract the contents of an archive]:xpak archive:_files -g \*.xpak' \
+	{'(--list -l --extract -x --create)-c','(--list -l --extract -x -c)--create'}'[Create an archive of a directory/files]:*:archive name and files to archive:_files' \
+	{'(--dir)-d','(-d)--dir'}'[Change to specified directory]:directory:_files -/' \
+	{'(--stdout)-O','(-O)--stdout'}'[Write files to stdout]'
+
 ;;
 esac

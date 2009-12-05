@@ -1,9 +1,11 @@
 #compdef layman
-#Author Baptiste Daroussin <baptiste.daroussin@gmail.com>
+
+# layman-1.1.1
+#
 local arguments actions_args actions global_opts add_actions 
 _layman_remote_overlays() {
 	local layman_list_overlays
-	layman_list_overlays=(${(S)${${(f)"$(layman -N -L)"}//\[*}#\* })
+	layman_list_overlays=(${(S)${${(f)"$(layman -k -N -L 2>/dev/null)"}//\[*}#\* })
 	compadd "$@" ${(kv)=layman_list_overlays} "ALL"
 }
 _layman_local_overlays() {

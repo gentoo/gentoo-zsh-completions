@@ -19,7 +19,7 @@ arguments=(
 
 _gcc_profile(){
     local profile
-    profile=(${(f)"$(_call_program gcc-installed gcc-config --list-profiles)"})
+    profile=(${(f)"$(_call_program gcc-installed RC_NOCOLOR=yes gcc-config --list-profiles)"})
     profile=${${profile/\[([^]]*)\]/}/\*}
     _tags profile && { compadd "$@" -k profile || compadd "$@" ${(kv)=profile} }
 }

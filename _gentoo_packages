@@ -1,7 +1,5 @@
 #autoload
 
-#Author: baptux <bapt@ifrance.com>
-#Author: oberyno <oberyno@gmail.com>
 #Description:
 # functions for gentoo packages
 # inspired by _deb_packages
@@ -63,6 +61,21 @@ _gentoo_packages_update_installed_versions(){
 
     installed_list=( ${installed_portage##*/pkg/} )
     _wanted cat_packages expl 'category/package' _multi_parts "$@" / installed_list
+}
+
+_gentoo_packages_update_available_pkgnames_only(){
+    local var trees packages
+
+    for var in PORTDIR PORTDIR_OVERLAY ; do
+	[[ -z ${(P)var} && -r /etc/make.conf ]] &&
+	    local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
+	[[ -z ${(P)var} && -r /etc/make.globals ]] &&
+	    local $var="`. /etc/make.globals 2>/dev/null; echo ${(P)var}`"
+    done
+    trees=( $PORTDIR $=PORTDIR_OVERLAY)
+
+    packages=( $trees/*-*/*(:t) )
+    _wanted packages expl 'package' compadd  - "${(@)packages}"
 }
 
 _gentoo_packages_update_available(){
@@ -133,11 +146,11 @@ _gentoo_packages () {
 	if [[ -z "$update_policy" ]]; then
 		zstyle ":completion:*:*:$service:*" cache-policy _gentoo_cache_policy
 	fi
-	[[ "$command" == (installed(_versions|)|available(_versions|)|binary|category|useflag|active_useflag) ]] || {
+	[[ "$command" == (installed(_versions|)|available(_versions|)|binary|category|(active_|)useflag|available_pkgnames_only) ]] || {
 		_message "unknown command: $command"
 		return
 	}
-	[[ "$pkgset" ==  (installed(_versions|)|available(_versions|)|binary|category|useflag|active_useflag) ]] || {
+	[[ "$pkgset" ==  (installed(_versions|)|available(_versions|)|binary|category|(active_|)useflag|available_pkgnames_only) ]] || {
 		pkgset="$command"
 	}
 	expl=("${(@)argv[1,-2]}")

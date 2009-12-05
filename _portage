@@ -1,38 +1,17 @@
-#compdef emerge rc-update rc-status ebuild opengl-update rc quickpkg
-
-# $Id: _portage,v 1.2 2005/02/22 14:22:54 usata Exp $
-
-# ZSH completion function for Portage
-# Author: baptux <bapt@ifrance.com>
-# Author: Mamoru KOMACHI <usata@gentoo.org>
-# Author: oberyno <oberyno@gmail.com>
+#compdef emerge ebuild quickpkg emaint env-update portageq repoman tbz2tool
 
 # Already done:
+# emerge        (fully done)
+# ebuild        (fully done)
+# emaint        (fully done)
+# env-update    (fully done)
+# portageq      (fully done)
+# repoman       (fully done)
+# tbz2tool      (fully done)
 #
-# emerge (fully done)
-# rc-update (fully done)
-# rc-status (fully done)
-# ebuild (fully done)
-# opengl-update (fully done)
-# rc (fully done)
+# Still TODO:
+# xpak
 
-# Stuff for rc
-_rc () {
-	if (( CURRENT == 2 ));then
-	    _values "runlevels" $gentoo_runlevels
-	fi
-}
-
-# Stuff for opengl-update (the easiest to do :) )
-
-_opengl-update () {
-	if (( CURRENT == 2 ));then
-		_values "opengl-update options" \
-		'xorg-x11[Use libGL.so from X.Org]' \
-		'xfree[Use libGL.so from XFree86]' \
-		'nvidia[Use libGL.so from the NVidia drivers.]'
-	fi
-}
 
 # Stuff for ebuild
 _ebuild () {
@@ -57,58 +36,12 @@ _ebuild () {
 		'postrm[Run specific actions that need to be executed after unmerge]' \
 		'config[Run specific actions needed to be executed after the emerge process has completed.]' \
 		'package[This command is a lot like the merge command, but create a .tbz2 package]' \
+		'manifest[Updates  the manifest file for the package.]' \
 		'rpm[Builds a RedHat RPM package]'
 	fi
 
 }
 
-# Stuff for rc-status
-_rc-status () {
-    if (( CURRENT == 2 ));then
-    _values "rc-status options" \
-	'-a[Show services at all run levels]' \
-	'--all[Show services at all run levels]' \
-	'-l[Show list of run levels]' \
-	'--list[Show list of run levels]' \
-	'-u[Show services not assigned to any run level]' \
-	'--unused[Show services not assigned to any run level]' \
-	$gentoo_runlevels
-    fi
-}
-
-# Stuff for rc-update
-
-_rc-update () {
-local used_init
-    used_init=(${=${(M)${(f)"$(rc-update show 2>/dev/null)"}:#*|*[a-z]*}% |*})
-    if (( CURRENT == 2 ));then
-       _values "rc-update actions" \
-       'add[Add script to a runlevel]' \
-       'del[Delete script from a runlevel]' \
-       'show[Show scripts lanched at a runlevel]' \
-       '-a[Add script to a runlevel]' \
-       '-d[Delete script from a runlevel]' \
-       '-s[Show scripts lanched at a runlevel]'
-    elif (( CURRENT == 3 ));then
-	case "$words[2]" in
-		add|-a)
-		 _values "scripts" /etc/init.d/*~*.sh(:t)
-		;;
-		del|-d)
-		_values "scripts" $used_init
-		;;
-		show|-s)
-		    _values "runlevels" $gentoo_runlevels
-		;;
-	esac
-    elif (( CURRENT == 4 ));then
-        case "$words[2]" in
-		add|-a|del|-d)
-		    _values "runlevels" $gentoo_runlevels
-		;;
-	esac
-    fi
-}
 
 # Stuff for quickpkg
 
@@ -150,6 +83,8 @@ _emerge () {
     '(--quiet -q --verbose -v)'{-q,--quiet}'[General outcome is a reduced or condensed output]'
     '(--verbose -v --quiet -q)'{-v,--verbose}'[Tell emerge to run in verbose mode]'
     '--nospinner[Disables the spinner for the session]'
+    #'--deselect[--deselect=n Remove atom from world file]'
+    '--deselect=[Remove atom from world file]'
   )
   install_args=(
     "($bopts)"{-b,--buildpkg}"[Tells emerge to build binary packages]"
@@ -196,7 +131,7 @@ _emerge () {
 
 
   # Dispatch
-  if (( $words[(I)(--(unmerge|clean|prune)|-[[:alpha:]]#(C|c|P)[[:alpha:]]#)] )) ; then
+  if (( $words[(I)(--(unmerge|clean|prune|deselect)|-[[:alpha:]]#(C|c|P)[[:alpha:]]#)] )) ; then
 	if compset -P '(\\|)(>=|<=|<|>|=)'; then
 	    _arguments -s \
 		'*:installed package:_gentoo_packages installed_versions' && return 0
@@ -206,7 +141,7 @@ _emerge () {
 		"*:installed package:_gentoo_packages installed" && return 0
 	fi
 
-  elif (( $words[(I)(world|system)] )) ; then
+  elif (( $words[(I)(world|system)] )) ; then  
     _arguments -s \
 	"$common_args[@]" "$install_args[@]" \
 	"($nopkg_opts[1,-2] --inject -i --oneshot -1):" && return 0
@@ -238,31 +173,134 @@ _emerge () {
 }
 
 
+_emaint () {
+    _arguments -s \
+        "(: -)"{-h,--help}'[show help message and exit]' \
+        "(: -)"--version"[show program's version number and exit]" \
+        '(-c --check -f --fix)'{-c,--check}"[Check for any problems that may exist]:emaint:((all\:'check all' world\:'check only world file'))" \
+        '(-c --check -f --fix)'{-f,--fix}"[Fix any problems that may exist]:emaint:((all\:'check all' world\:'check only world file'))"
+}
 
-local gentoo_runlevels
-gentoo_runlevels=(/etc/runlevels/*(:t))
+
+_env-update () {
+    _arguments -s '(: -)--no-ldconfig[Do not run ldconfig]'
+}
+
+
+_portageq () {
+    local action
+
+    action="$words[2]"
+
+    if (( CURRENT == 2 )); then
+        _values 'command'                                                                   \
+            '--help[Show help]'                                                             \
+            'config_protect_mask[Returns the CONFIG_PROTECT_MASK paths]'                    \
+            'config_protect[Returns the CONFIG_PROTECT paths]'                              \
+            'portdir[Returns PORTDIR paths]'                                                \
+            'contents[List the files that are installed for a given package]'                \
+            'vdb_path[Returns the path used for the var(installed) package database]'       \
+            'gentoo_mirrors[Returns the mirrors set to use in the portage configuration]'   \
+            'exithandler[MISSING DOCUMENTATION!]'                                           \
+            'all_best_visible[Returns all best_visible packages (without .ebuild)]'         \
+            'match[Returns a \n separated list of category/package-version]'                \
+            'metadata[Returns metadata values for the specified package]'                   \
+            'best_visible[Returns category/package-version (without .ebuild)]'              \
+            'mass_best_visible[Returns category/package-version (without .ebuild)]'         \
+            "has_version[Return code 0 if it's available, 1 otherwise]"                     \
+            'envvar[Returns a specific environment variable as exists prior to ebuild.sh]'  \
+            'pkgdir[Returns the PKGDIR path]'                                               \
+            'best_version[Returns category/package-version (without .ebuild)]'              \
+            'mass_best_version[Returns category/package-version (without .ebuild)]'         \
+            'portdir_overlay[Returns the PORTDIR_OVERLAY path]'                             \
+            'distdir[Returns the DISTDIR path]'                                             \
+            'owners[print the packages that own the files and which files belong to each package]'
+    elif (( CURRENT == 3 )); then
+        if [[ "$action" =~ (contents|(all_|mass_|)best_visible|match|metadata|(has|best)_version|owners|mass_best_version) ]]; then
+            _arguments -s '*:root:_files -g /'
+        fi
+    elif (( CURRENT > 3 )); then
+        if [[ "$action" =~ ((mass_|)best_(visible|version)|has_version) ]]; then
+            _arguments -s '*:package:_gentoo_packages available'
+        elif [[ "$action" == owners ]]; then
+            _arguments -s '*:root:_files'
+        fi
+    fi
+}
+
+
+_repoman () {
+    local previous
+
+    previous="$words[CURRENT-1]"
+
+    _arguments -s \
+       '(--force)'--force'[Force commit to proceed, regardless of QA issues]'                                                           \
+       '(-q --quiet -v --verbose)'{-q,--quiet}'[Be less verbose about extraneous info]'                                                 \
+       '(-p --pretend -m --commitmsg -M --commitmsgfile)'{-p,--pretend}'[Don’t commit or fix anything; just show what would be done]'   \
+       '(-i --include-masked)'{-i,--include-masked}'[Include masked packages in scans at category or tree level]'                       \
+       '(-x --xmlparse)'{-x,--xmlparse}'[Forces the metadata.xml parse check to be carried out]'                                        \
+       '(-q --quiet -v --verbose)'{-v,--verbose}'[Displays every package name while checking]'                                          \
+       '(-I --ignore-arches)'{-I,--ignore-arches}'[Ignore arch-specific failures (where arch != host)]'                                 \
+       '(-m --commitmsg -M --commitmsgfile)'{-m,--commitmsg}'[Adds a commit message via the command line]:message:'                     \
+       '(-m --commitmsg -M --commitmsgfile)'{-M,--commitmsgfile}'[Adds a commit message from the specified file]:commit_file:_files'    \
+       '(: -)'{-V,--version}'[Show version info]'                                                                                       \
+       '(: -)'{-h,--help}'[Show this screen]'
+
+       # if we don't have an option that cancel action, or if we don't already have an action.
+       if ! [[ "$previous" =~ (-h|-V|-m|-M|--version|--help|--commitmsg|--commitmsgfile) ]] &&
+          ! (( $words[(I)(full|last|help|scan|fix|lfull|manifest|commit)] ));               then
+            _values 'action'                                                \
+               'full[Scan directory tree for QA issues (full listing)]'     \
+               'last[Remember report from last run]'                        \
+               'help[Show this screen]'                                     \
+               'scan[Scan directory tree for QA issues (short listing)]'    \
+               'fix[Fix simple QA issues (stray digests, missing digests)]' \
+               'lfull[Remember report from last run (full listing)]'        \
+               'manifest[Generate a Manifest (fetches files if necessary)]' \
+               'commit[Scan directory tree for QA issues; if OK, commit via cvs]'
+       fi
+}
+
+
+_tbz2tool () {
+    if   (( CURRENT == 2 )); then
+        _values 'action' 'join' 'split'
+    elif (( CURRENT > 2 )) && (( CURRENT < 6 )); then
+        _arguments -s '*:file:_files'
+    fi
+}
+
+
+zparseopts -D -E -A Args -- -emerge
+if (( ${+Args[--emerge]} ));then
+	_emerge "$@" && return 0
+fi
 
 case "$service" in
 	emerge)
 		_emerge "$@" && return 0
 		;;
-	rc-update)
-		_rc-update "$@" && return 0
-		;;
-	rc-status)
-		_rc-status "$@" && return 0
-		;;
 	ebuild)
 		_ebuild "$@" && return 0
-		;;
-	opengl-update)
-		_opengl-update "$@" && return 0
-		;;
-	rc)
-		_rc "$@" && return 0
 		;;
 	quickpkg)
 		_quickpkg "$@" && return 0
 		;;
-
+	emaint)
+		_emaint "$@" && return 0
+		;;
+	env-update)
+		_env-update "$@" && return 0
+		;;
+	portageq)
+		_portageq "$@" && return 0
+		;;
+	repoman)
+		_repoman "$@" && return 0
+		;;
+	tbz2tool)
+		_tbz2tool "$@" && return 0
+		;;
 esac
+

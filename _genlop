@@ -1,13 +1,6 @@
 #compdef genlop
 
-# ZSH completion function for genlop
-#
-# Original authors of portage completion
-# Author: baptux <bapt@ifrance.com>
-# Author: Mamoru KOMACHI <usata@gentoo.org>
-#
-# Adapted for genlop by oberyno <oberyno@gmail.com>
-
+#genlop 0.30.8
 _genlop () {
 local prev1="$words[CURRENT-1]"  prev2="$words[CURRENT-2]" days months arg single state lstate
 days=(monday tuesday wednesday thursday friday saturday sunday)
