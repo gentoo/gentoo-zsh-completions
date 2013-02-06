@@ -4,10 +4,13 @@
 #
 local common_args PORTDIR
 var=PORTDIR
+[[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
+local $var="`. /etc/portage/make.conf 2>/dev/null; echo ${(P)var}`"
 [[ -z ${(P)var} && -r /etc/make.conf ]] &&
 local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
-[[ -z ${(P)var} && -r /etc/make.globals ]] &&
-local $var="`. /etc/make.globals 2>/dev/null; echo ${(P)var}`"
+[[ -z ${(P)var} && -r /usr/share/portage/config/make.globals ]] &&
+local $var="`. /usr/share/portage/config/make.globals 2>/dev/null; echo ${(P)var}`"
+
 common_args=(
 	{'(--verbose)-v','(-v)--verbose'}'[Make a lot of noise]' \
 	{'(--quiet)-q','(-q)--quiet'}'[Tighter output; suppress warnings]' \
