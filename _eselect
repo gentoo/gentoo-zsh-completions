@@ -130,7 +130,7 @@ _eselect () {
   	"--colour=no[Disable coloured output]" \
   	"--color=no[Disable coloured output]"
   		)
-  modnames=(${${${(M)${(f)"$(eselect --color=no list-modules)"}## *}//   */}//  /})
+  modnames=(${${${(M)${(f)"$(eselect --color=no modules list)"}## *}//   */}//  /})
 
   if ((CURRENT == 2)); then
     _arguments -s \
