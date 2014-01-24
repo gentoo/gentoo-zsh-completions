@@ -22,4 +22,4 @@ for i in ${COMPLETION_WIDGETS}; do
 	cp ${i} ${snapshot_dir}
 done
 
-${TAR} -jcf ${snapshot_dir}.tar.bz2 ${snapshot_dir}
+${TAR} -Jcf ${snapshot_dir}.tar.xz ${snapshot_dir}
