@@ -67,13 +67,16 @@ qlist)
   _arguments -s $common_args \
 	{'(--installed)-I','(-I)--installed'}'[Just show installed packages]' \
 	{'(--slots)-S','(-S)--slots'}'[Display installed packages with slots]' \
+	{'(--repo)-R','(-R)--repo'}'[Display installed packages with repository]' \
 	{'(--umap)-U','(-U)--umap'}'[Display installed packages with flags used]' \
-	{'(--dups)-D','(-D)--dups'}'[Only show package dups]' \
+	{'(--columns)-c','(-c)--columns'}'[Display column view]' \
+	'--show-debug[Show /usr/lib/debug files]' \
 	{'(--exact)-e','(-e)--exact'}'[Exact match (only CAT/PN or PN without PV)]' \
 	{'(--all)-a','(-a)--all'}'[Show every installed package]' \
 	{'(--dir)-d','(-d)--dir'}'[Only show directories]' \
 	{'(--obj)-o','(-o)--obj'}'[Only show objects]' \
-	{'(--sym)-s','(-s)--sy'}'[Only show symlinks]' \
+	{'(--sym)-s','(-s)--sym'}'[Only show symlinks]' \
+	'--root[Set the ROOT env var]:root directory:_files -/' \
 	'*:packages:_gentoo_packages installed'
 ;;
 qlop)
