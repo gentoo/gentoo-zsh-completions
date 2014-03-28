@@ -13,6 +13,7 @@ var=PORTDIR
 	local $var="`. /usr/share/portage/config/make.globals 2>/dev/null; echo ${(P)var}`"
 
 common_args=(
+	'--root[Set the ROOT env var]:root directory:_files -/' \
 	{'(--verbose)-v','(-v)--verbose'}'[Make a lot of noise]' \
 	{'(--quiet)-q','(-q)--quiet'}'[Tighter output; suppress warnings]' \
 	{'(--nocolor)-C','(-C)--nocolor'}'[Do not output color]' \
@@ -78,7 +79,6 @@ case $service in
 			{'(--dir)-d','(-d)--dir'}'[Only show directories]' \
 			{'(--obj)-o','(-o)--obj'}'[Only show objects]' \
 			{'(--sym)-s','(-s)--sym'}'[Only show symlinks]' \
-			'--root[Set the ROOT env var]:root directory:_files -/' \
 			'*:packages:_gentoo_packages installed'
 		;;
 	qlop)
