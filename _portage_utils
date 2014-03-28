@@ -58,10 +58,11 @@ case $service in
 			{'(--depend)-d','(-d)--depend'}'[Show DEPEND info (default)]' \
 			{'(--rdepend)-r','(-r)--rdepend'}'[Show RDEPEND info]' \
 			{'(--pdepend)-p','(-p)--pdepend'}'[Show PDEPEND info]' \
-			{'(--key)-k','(-k)--key'}'[User defined vdb key]' \
+			{'(--key)-k','(-k)--key'}'[User defined vdb key]:vdb key' \
 			{'(--query)-Q','(-Q)--query'}'[Query reverse deps]' \
 			{'(--name-only)-N','(-N)--name-only'}'[Only show package name]' \
 			{'(--all)-a','(-a)--all'}'[Show all DEPEND info]' \
+			{'(--format)-f','(-f)--format'}'[Pretty format specified depend strings]' \
 			'*:packages:_gentoo_packages installed'
 		;;
 	qfile)
