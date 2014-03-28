@@ -42,7 +42,15 @@ case $service in
 	qcheck)
 		_arguments -s $common_args \
 			{'(--all)-a','(-a)--all'}'[List all packages]' \
-			{'(--update)-u','(-u)--update'}'[Update chksum and mtimes for packages]' \
+			{'(--exact)-e','(-e)--exact'}'[Exact match (only CAT/PN or PN without PV)]' \
+			{'(--skip)-s','(-s)--skip'}'[Ignore files matching regular expression]:regex' \
+			{'(--update)-u','(-u)--update'}'[Update missing files, chksum and mtimes for packages]' \
+			{'(--noafk)-A','(-A)--noafk'}'[Ignore missing files]' \
+			{'(--badonly)-B','(-B)--badonly'}'[Only print pkgs containing bad files]' \
+			{'(--nohash)-H','(-H)--nohash'}'[Ignore differing/unknown file chksums]' \
+			{'(--nomtime)-T','(-T)--nomtime'}'[Ignore differing file mtimes]' \
+			'--skip-protected[Ignore files in CONFIG_PROTECT-ed paths]' \
+			{'(--prelink)-p','(-p)--prelink'}'[Undo prelink when calculating checksums]' \
 			'*:packages:_gentoo_packages installed'
 		;;
 	qdepends)
