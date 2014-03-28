@@ -22,6 +22,10 @@ common_args=(
 )
 
 case $service in
+	qatom)
+		_arguments -s $common_args \
+			{'(--compare)-c','(-c)--compare'}'[Compare two atoms]'
+		;;
 	qcache)
 		local arches allarches arch
 		show_archs(){
