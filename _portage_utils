@@ -1,4 +1,4 @@
-#compdef qatom qcheck qdepends qfile qgrep qcache qlist qlop qsearch qsize quse qtbz2 qpkg qxpak
+#compdef qatom qcache qcheck qdepends qfile qgrep qlist qlop qpkg qsearch qsize qtbz2 quse qxpak
 
 #portage-utils-0.19
 #
