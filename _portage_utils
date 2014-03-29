@@ -27,15 +27,17 @@ case $service in
 			{'(--compare)-c','(-c)--compare'}'[Compare two atoms]'
 		;;
 	qcache)
-		local arches allarches arch
+		local arch
+		local -a arches allarches
+
 		show_archs(){
 			arches=(${(f)"$(<$PORTDIR/profiles/arch.list)"})
-			allarches=($archs)
 			for arch in $arches; do
-				allarches=($allarches $arch)
+				[[ $arch =~ '^[^#]' ]] && allarches+=( $arch )
 			done
 			_describe -t available-arches "arch" allarches
 		}
+
 		_arguments -s $common_args \
 			{'(--matchpkg)-p','(-p)--matchpkg'}'[match pkgname]:package name:_gentoo_packages available_pkgnames_only' \
 			{'(--matchcat)-c','(-c)--matchcat'}'[match catname]:category:_gentoo_packages category' \
