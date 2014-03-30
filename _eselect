@@ -34,7 +34,7 @@ _eselect_kernel () {
 		kernellist=(${${${(M)${(f)"$(eselect --color=no kernel list)"}## *}// \**/}//(  \[*\]   |  \[*\]  )/})
 		_values "available kernel version" $kernellist[@] && return 0
 	fi
-	_values "kenrel options" $common_values \
+	_values "kernel options" $common_values \
 		"list[List available kernel symlink targets]" \
 		"show[Show the current kernel symlink]" \
 		"set[Set a new kernel symlink target]" && return 0
@@ -86,7 +86,7 @@ _eselect_opengl () {
 	if (( $words[(I)(set)] )); then
 		opengllist=(${${${(M)${(f)"$(eselect --color=no opengl list)"}## *}// \**/}//(  \[*\]  |  \[*\]  )/})
 		_values -w "opengl implementations and options" $opengllist[@] \
-			"--use-old[If an implementationis already set, use that one instead]" \
+			"--use-old[If an implementation is already set, use that one instead]" \
 			"--prefix[Set the source prefix]:path:_files -/" \
 			"--dst-prefix[Set the destination prefix]:path:_files -/" \
 			"--impl-headers[Override global headers with ones provided by this profile]" && return 0
@@ -116,8 +116,8 @@ _eselect () {
 	local globopts sedcmd modnames modopts
 
 	globopts=(
-	"--colour=no[Disable coloured output]" \
-	"--color=no[Disable coloured output]"
+		"--colour=no[Disable coloured output]"
+		"--color=no[Disable coloured output]"
 	)
 	modnames=(${${${(M)${(f)"$(eselect --color=no modules list)"}## *}//   */}//  /})
 
