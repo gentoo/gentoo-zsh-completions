@@ -56,7 +56,7 @@ _eselect_ctags () {
 _eselect_profile () {
 	local profilelist
 	if (( $words[(I)(set)] )); then
-		profilelist=(${(f)"$(eselect --brief --color=no profile list)"})
+		profilelist=(${${(f)"$(eselect --brief --color=no profile list)"}/:/\\:})
 		_values -w "available profiles" $profilelist[@] \
 			"--force[Forcibly set the symlink]" && return 0
 	fi
