@@ -19,7 +19,7 @@ _eselect_env () {
 _eselect_binutils () {
 	local binutilslist
 	if (( $words[(I)(set)] )); then
-		binutilslist=(${${${(M)${(f)"$(eselect --color=no binutils list)"}## *}// \**/}//(  \[*\]   |  \[*\]  )/})
+		binutilslist=(${(f)"$(eselect --brief --color=no binutils list)"})
 		_values "available binutils version" $binutilslist[@] && return 0
 	fi
 	_values "binutils options" $common_values \
@@ -31,7 +31,7 @@ _eselect_binutils () {
 _eselect_kernel () {
 	local kernellist
 	if (( $words[(I)(set)] )); then
-		kernellist=(${${${(M)${(f)"$(eselect --color=no kernel list)"}## *}// \**/}//(  \[*\]   |  \[*\]  )/})
+		kernellist=(${(f)"$(eselect --brief --color=no kernel list)"})
 		_values "available kernel version" $kernellist[@] && return 0
 	fi
 	_values "kernel options" $common_values \
@@ -43,7 +43,7 @@ _eselect_kernel () {
 _eselect_ctags () {
 	local ctagslist
 	if (( $words[(I)(set)] )); then
-		ctagslist=(${${${(M)${(f)"$(eselect --color=no ctags list)"}## *}// \**/}//(  \[*\]  |  \[*\]  )/})
+		ctagslist=(${(f)"$(eselect --brief --color=no ctags list)"})
 		_values "available ctags version" $ctagslist[@] && return 0
 	fi
 	_values "ctags options" $common_values \
@@ -56,7 +56,7 @@ _eselect_ctags () {
 _eselect_profile () {
 	local profilelist
 	if (( $words[(I)(set)] )); then
-		profilelist=(${${${(M)${(f)"$(eselect --color=no profile list)"}## *}// \**/}//(  \[*\]  |  \[*\]  )/})
+		profilelist=(${(f)"$(eselect --brief --color=no profile list)"})
 		_values -w "available profiles" $profilelist[@] \
 			"--force[Forcibly set the symlink]" && return 0
 	fi
@@ -84,7 +84,7 @@ _eselect_fontconfig () {
 _eselect_opengl () {
 	local opengllist
 	if (( $words[(I)(set)] )); then
-		opengllist=(${${${(M)${(f)"$(eselect --color=no opengl list)"}## *}// \**/}//(  \[*\]  |  \[*\]  )/})
+		opengllist=(${(f)"$(eselect --brief --color=no opengl list)"})
 		_values -w "opengl implementations and options" $opengllist[@] \
 			"--use-old[If an implementation is already set, use that one instead]" \
 			"--prefix[Set the source prefix]:path:_files -/" \
@@ -100,7 +100,7 @@ _eselect_opengl () {
 _eselect_vi () {
 	local vilist
 	if (( $words[(I)(set)] )); then
-		vilist=(${${${(M)${(f)"$(eselect --color=no vi list)"}## *}// \**/}//(  \[*\]   |  \[*\]  )/})
+		vilist=(${(f)"$(eselect --brief --color=no vi list)"})
 		_values -w "vi implementation" $vilist[@] && return 0
 	elif (( $words[(I)(update)] )); then
 		_values -w "option" "--if-unset[Do not override existing implementation]" && return 0
@@ -116,10 +116,11 @@ _eselect () {
 	local globopts modnames modopts
 
 	globopts=(
+		"--brief[Make output shorter]"
 		"--colour=no[Disable coloured output]"
 		"--color=no[Disable coloured output]"
 	)
-	modnames=(${${${(M)${(f)"$(eselect --color=no modules list)"}## *}//   */}//  /})
+	modnames=(${${${(M)${(f)"$(eselect --brief --color=no modules list)"}## *}//   */}//  /})
 
 	if ((CURRENT == 2)); then
 		_arguments -s \
@@ -133,7 +134,7 @@ _eselect () {
 			if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi) ]]; then
 				_eselect_$words[2] "$@"
 			else
-				modopts=(${${${(M)${(f)"$(eselect --color=no $words[2] usage)"}## *}//   */}//  /})
+				modopts=(${${${(M)${(f)"$(eselect --brief --color=no $words[2] usage)"}## *}//   */}//  /})
 				_arguments -s \
 					"*:portage:_values 'eselect $words[2] options' \$modopts[@]" && return 0
 			fi
@@ -144,7 +145,7 @@ _eselect () {
 				if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi) ]]; then
 					_eselect_$words[3] "$@"
 				else
-					modopts=(${${${${(M)${(f)"$(eselect --color=no $words[3] usage)"}## *}//   */}//  /}// *})
+					modopts=(${${${${(M)${(f)"$(eselect --brief --color=no $words[3] usage)"}## *}//   */}//  /}// *})
 					_arguments -s \
 						"*:portage:_values 'eselect $words[3] options' \$modopts[@]" && return 0
 				fi
