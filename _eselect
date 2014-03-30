@@ -9,8 +9,8 @@ common_values=(
 _eselect_env () {
 	if (( $words[(I)(update)] )); then
 		_values "update options" \
-		"makelinks[force updating of links]" \
-		"noldconfig[Do not alter the ld.so cache or configuration]" && return 0
+			"makelinks[force updating of links]" \
+			"noldconfig[Do not alter the ld.so cache or configuration]" && return 0
 	fi
 	_values "env options" $common_values \
 		'update[Collect environment variables from all scripts in /etc/env.d/]' && return 0
@@ -58,7 +58,7 @@ _eselect_profile () {
 	if (( $words[(I)(set)] )); then
 		profilelist=(${${${(M)${(f)"$(eselect --color=no profile list)"}## *}// \**/}//(  \[*\]  |  \[*\]  )/})
 		_values -w "available profiles" $profilelist[@] \
-		"--force[Forcibly set the symlink]" && return 0
+			"--force[Forcibly set the symlink]" && return 0
 	fi
 	_values "profile options" $common_values \
 		"list[List available profile symlink targets]" \
@@ -113,7 +113,7 @@ _eselect_vi () {
 }
 
 _eselect () {
-	local globopts sedcmd modnames modopts
+	local globopts modnames modopts
 
 	globopts=(
 		"--colour=no[Disable coloured output]"
