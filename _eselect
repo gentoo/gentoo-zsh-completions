@@ -89,7 +89,7 @@ _eselect_opengl () {
 			"--use-old[If an implementation is already set, use that one instead]" \
 			"--prefix[Set the source prefix]:path:_files -/" \
 			"--dst-prefix[Set the destination prefix]:path:_files -/" \
-			"--impl-headers[Override global headers with ones provided by this profile]" && return 0
+			"--ignore-missing[Ignore missing files when setting a new implementation]" && return 0
 	fi
 	_values "opengl options" $common_values \
 		"list[List the available OpenGL implementations]" \
