@@ -39,6 +39,7 @@ _eselect_kernel () {
 		"show[Show the current kernel symlink]" \
 		"set[Set a new kernel symlink target]" && return 0
 }
+
 _eselect_ctags () {
 	local ctagslist
 	if (( $words[(I)(set)] )); then
@@ -51,6 +52,7 @@ _eselect_ctags () {
 		"update[Automatically update the ctags symlink]" \
 		"set[Set a new ctags symlink target]" && return 0
 }
+
 _eselect_profile () {
 	local profilelist
 	if (( $words[(I)(set)] )); then
@@ -63,6 +65,7 @@ _eselect_profile () {
 		"show[Show the current make.profile symlink]" \
 		"set[Set a new profile symlink target]" && return 0
 }
+
 _eselect_fontconfig () {
 	local fclistenabled fclistdisabled
 	if (( $words[(I)(enable)] )); then
@@ -77,6 +80,7 @@ _eselect_fontconfig () {
 		"disable[Disable specified fontconfig .conf file(s)]" \
 		"enable[Enable specified fontconfig .conf file(s)]" && return 0
 }
+
 _eselect_opengl () {
 	local opengllist
 	if (( $words[(I)(set)] )); then
@@ -92,6 +96,7 @@ _eselect_opengl () {
 		"set[Select the OpenGL implementation]" \
 		"show[Print the current OpenGL implementation]" && return 0
 }
+
 _eselect_vi () {
 	local vilist
 	if (( $words[(I)(set)] )); then
@@ -106,6 +111,7 @@ _eselect_vi () {
 		"show[Show the current vi implementation]" \
 		"update[Automatically update the vi provider]"
 }
+
 _eselect () {
 	local globopts sedcmd modnames modopts
 
