@@ -112,6 +112,42 @@ _eselect_vi () {
 		"update[Automatically update the vi provider]"
 }
 
+_eselect_news() {
+
+	## TODO: Normal numeric sorting.
+	## I've spent many time on trying to rewrite this
+	## function to normally sort (to DO NOT sort, actually) items,
+	## but it growing bigger and bigger and going to be too complicated.
+	## So, I (mva) either need to help to make it in the "right way".
+	## Or, maybe, to completely rewrite this compdef.
+
+	local -a newslist;
+	if ((CURRENT == 3)); then
+		_values 'news options' $stdopts[@] \
+		'list[List news items]' \
+		'count[Display number of news items]' \
+		'purge[Purge read news]' \
+		'read[Read news items]' \
+		'unread[Mark read news items as unread again]' && return 0
+	elif ((CURRENT == 4)); then
+		if (( $words[(I)(count)] )); then
+		_values -w 'news' 'new[Count only new news items]' 'all[Count all news items]' && return 0
+		fi
+
+		newslist=(${${${${${${${(M)${(f)"$(eselect --color=no news list)"}## *}// \**/}/ \[/}/\] ##/\[}/%/]}/ \[/ (}/\] /) })
+
+		if (( $words[(I)(read)] )); then
+			newslist+=( "new[Read unread news items (default)]" "all[Read all news items]" "--mbox[Output in mbox format]" "--quiet[Suppress output, only change status]" "--raw[Output in raw format]" )
+		fi;
+
+		if (( $words[(I)(unread)] )); then
+			newslist+=( "all[Unread all news items]" )
+		fi
+
+		_values -w 'news' $newslist[@] && return 0
+	fi
+}
+
 _eselect () {
 	local globopts modnames modopts
 
@@ -131,7 +167,7 @@ _eselect () {
 			_arguments -s \
 				"*:portage:_values 'eselect modules' \$modnames[@]" && return 0
 		elif (( $modnames[(I)$words[2]] )); then
-			if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi) ]]; then
+			if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
 				_eselect_$words[2] "$@"
 			else
 				modopts=(${${${(M)${(f)"$(eselect --brief --color=no $words[2] usage)"}## *}//   */}//  /})
@@ -142,7 +178,7 @@ _eselect () {
 	elif ((CURRENT >= 4)); then
 		if (( $words[(I)(--color=no|--colour=no)] )); then
 			if (( $modnames[(I)$words[3]] )); then
-				if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi) ]]; then
+				if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
 					_eselect_$words[3] "$@"
 				else
 					modopts=(${${${${(M)${(f)"$(eselect --brief --color=no $words[3] usage)"}## *}//   */}//  /}// *})
@@ -152,7 +188,7 @@ _eselect () {
 			fi
 		else
 			if (( $modnames[(I)$words[2]] )); then
-				_eselect_$words[2] "$@"
+				(( $+functions[_eselect_$words[2]] )) && _eselect_$words[2] "$@"
 			fi
 		fi
 	fi
