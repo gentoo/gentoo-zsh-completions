@@ -134,7 +134,7 @@ _eselect_news() {
 		_values -w 'news' 'new[Count only new news items]' 'all[Count all news items]' && return 0
 		fi
 
-		newslist=(${${${${${${${(M)${(f)"$(eselect --color=no news list)"}## *}// \**/}/ \[/}/\] ##/\[}/%/]}/ \[/ (}/\] /) })
+		newslist=(${${${${${${${(M)${(f)"$(eselect --color=no news list)"}## *}// \**/}/  \[/}/\] ##/\[}/%/]}/ \[/ (}/\] /) })
 
 		if (( $words[(I)(read)] )); then
 			newslist+=( "new[Read unread news items (default)]" "all[Read all news items]" "--mbox[Output in mbox format]" "--quiet[Suppress output, only change status]" "--raw[Output in raw format]" )
