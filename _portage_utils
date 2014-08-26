@@ -2,15 +2,90 @@
 
 # portage-utils-0.53
 
-local common_args PORTDIR
-var=PORTDIR
 
-[[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
-	local $var="`. /etc/portage/make.conf 2>/dev/null; echo ${(P)var}`"
-[[ -z ${(P)var} && -r /etc/make.conf ]] &&
-	local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
-[[ -z ${(P)var} && -r /usr/share/portage/config/make.globals ]] &&
-	local $var="`. /usr/share/portage/config/make.globals 2>/dev/null; echo ${(P)var}`"
+_portdir() {
+    local mainreponame mainrepopath overlayname overlaypath
+
+    if [[ -e /usr/share/portage/config/repos.conf ]]; then
+        if [[ ${1} == -o ]]; then
+            for overlayname in $(_parsereposconf -l); do
+                overlaypath+=($(_parsereposconf ${overlayname} location))
+            done
+
+            source /etc/make.conf 2>/dev/null
+            source /etc/portage/make.conf 2>/dev/null
+
+            overlaypath+=(${PORTDIR_OVERLAY})
+
+            # strip out duplicates
+            overlaypath=($(printf "%s\n" "${overlaypath[@]}" | sort -u))
+
+            echo "${overlaypath[@]}"
+        else
+            mainreponame=$(_parsereposconf DEFAULT main-repo)
+            mainrepopath=$(_parsereposconf ${mainreponame} location)
+
+            echo "${mainrepopath}"
+        fi
+    else
+        source /usr/share/portage/config/make.globals 2>/dev/null
+        source /etc/make.conf 2>/dev/null
+        source /etc/portage/make.conf 2>/dev/null
+
+        echo "${PORTDIR}"
+
+        if [[ ${1} == -o ]]; then⋅
+            echo "${PORTDIR_OVERLAY}"
+        fi⋅⋅⋅
+    fi
+}
+
+_parsereposconf() {
+    local f insection line section v value var
+
+    for f in /usr/share/portage/config/repos.conf \
+        /etc/portage/repos.conf \
+        /etc/portage/repos.conf/*.conf; do
+
+        [[ -f ${f} ]] || continue
+        insection=0
+
+        while read -r line; do
+            # skip comments and blank lines
+            [[ -z ${line} || ${line} == '#'* ]] && continue
+
+            if [[ ${insection} == 1 && ${line} == '['*']' ]]; then
+                # End of the section we were interested in so stop
+                secname+=(${line//[(\[|\])]/}) # record name for -l
+                break
+            elif [[ ${line} == '['*']' ]]; then
+                # Entering a new section, check if it's the one we want
+                section=${line//[(\[|\])]/}
+                [[ ${section} == "${1}" ]] && insection=1
+                secname+=(${section}) # record name for -l
+            elif [[ ${insection} == 1 ]]; then
+                # We're in the section we want, grab the values
+                var=${line%%=*}
+                var=${var// /}
+                value=${line#*=}
+                value=${value# }
+                [[ ${var} == ${2} ]] && v=${value}
+            fi
+            continue
+        done < "${f}"
+    done
+
+    if [[ ${1} == -l ]]; then
+        echo "${secname[@]}"
+    else
+        echo "${v}"
+    fi
+}
+
+
+local common_args PORTDIR
+
+PORTDIR="$(_portdir)"
 
 common_args=(
 	'--root[Set the ROOT env var]:root directory:_files -/' \
