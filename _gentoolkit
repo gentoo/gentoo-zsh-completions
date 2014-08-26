@@ -126,6 +126,18 @@ _equery () {
 		 '--filter=[filter output]:filter(s):_values -s , '' dir obj sym dev fifo path conf cmd doc man info' \
 		 ':installed pkgname:_packages installed' && ret=0
 		;;
+	    meta|m)
+		_arguments \
+		  '(-d --description)'{-d,--description}'[show an extended package description]' \
+		  '(-H --herd)'{-H,--herd}'[show the herd(s) for the package]' \
+		  '(-k --keywords)'{-k,--keywords}'[show keywords for all matching package versions]' \
+		  '(-m --maintainer)'{-m,--maintainer}'[show the maintainer(s) for the package]' \
+		  '(-S --stablreq)'{-S,--stablreq}'[show STABLEREQ arches (ccs) for all matching package versions]' \
+		  '(-u --useflags)'{-u,--useflags}'[show per-package USE flag descriptions]' \
+		  '(-U --upstream)'{-U,--upstream}'[show packages upstream information]' \
+		  '(-x --xml)'{-x,--xml}'[show the plain metadata.xml file]' \
+		  ':package:_packages available' && ret=0
+		;;
 	    hasuse|h)
 		_arguments \
 		  $common_args \
@@ -150,6 +162,12 @@ _equery () {
 		  {--all,-a}'[include non-installed packages]' \
 		  ":portage:_packages installed" && ret=0
 		;;
+	    changes|c)
+		_arguments \
+		  '(-l --latest)'{-l,--latest}'[only display latest ChangeLog entry]' \
+		  '(-f --full)'{-f,--full}'[display full ChangeLog entry]' \
+		  ':portage:_packages available' && ret=0
+		;;
     	    *)
 		_message 'command not found'
 		;;
@@ -160,6 +178,7 @@ _equery () {
 	tmp=(
 	    {belongs,b}'[list all packages owning file(s)]'
 	    {check,k}'[check MD5sums and timestamps of package]'
+	    {changes,c}'[shows ChangeLog for specified package]'
 	    {depends,d}'[list all packages depending on specified package]'
 	    {depgraph,g}'[display a dependency tree for package]'
 	    {files,f}'[list files owned by package]'
@@ -168,6 +187,9 @@ _equery () {
 	    {size,s}'[print size of files contained in package]'
 	    {uses,u}'[display USE flags for package]'
 	    {which,w}'[print full path to ebuild for package]'
+	    {has,a}'[list all packages matching ENVIRONMENT data stored in /var/db/pkg]'
+	    {keywords,y}'[display keywords for specified PKG]'
+	    {meta,m}'[display metadata about PKG]'
 	)
 	    _values 'equery command' $tmp && ret=0
     ;;
