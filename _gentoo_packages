@@ -1,5 +1,6 @@
 #autoload
 
+setopt extendedglob bareglobqual
 #Description:
 # functions for gentoo packages
 # inspired by _deb_packages
@@ -18,12 +19,9 @@ _portdir() {
             source /etc/make.conf 2>/dev/null
             source /etc/portage/make.conf 2>/dev/null
 
-            overlaypath+=(${PORTDIR_OVERLAY})
+            overlaypath+=(${(@)PORTDIR_OVERLAY})
 
-            # strip out duplicates
-            overlaypath=($(printf "%s\n" "${overlaypath[@]}" | sort -u))
-
-            echo "${overlaypath[@]}"
+            echo "${(@u)overlaypath}"
         else
             mainreponame=$(_parsereposconf DEFAULT main-repo)
             mainrepopath=$(_parsereposconf ${mainreponame} location)
@@ -35,53 +33,131 @@ _portdir() {
         source /etc/make.conf 2>/dev/null
         source /etc/portage/make.conf 2>/dev/null
 
-        echo "${PORTDIR}"
-
-        if [[ ${1} == -o ]]; then⋅
-            echo "${PORTDIR_OVERLAY}"
-        fi⋅⋅⋅
+        if [[ "-o" == ${1} ]]; then
+            echo "${(@u)PORTDIR_OVERLAY}"
+        else
+            echo "${PORTDIR}"
+        fi
     fi
 }
 
 _parsereposconf() {
-    local f insection line section v value var
+    local v f insection section arr;
 
     for f in /usr/share/portage/config/repos.conf \
         /etc/portage/repos.conf \
         /etc/portage/repos.conf/*.conf; do
 
         [[ -f ${f} ]] || continue
-        insection=0
+        insection=0;
+        declare -A arr;
+        IFS='= ';
 
-        while read -r line; do
-            # skip comments and blank lines
-            [[ -z ${line} || ${line} == '#'* ]] && continue
+        while read -r name value; do
+            [[ -z ${name} || ${name} == '#'* ]] && continue
 
-            if [[ ${insection} == 1 && ${line} == '['*']' ]]; then
-                # End of the section we were interested in so stop
-                secname+=(${line//[(\[|\])]/}) # record name for -l
+            if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+                value=${name//(\]|\[)};
+                name="section";
+            fi;
+            arr[${name}]=${value};
+
+            if [[ ${insection} == 1 && ${name} == "section" ]]; then
                 break
-            elif [[ ${line} == '['*']' ]]; then
-                # Entering a new section, check if it's the one we want
-                section=${line//[(\[|\])]/}
-                [[ ${section} == "${1}" ]] && insection=1
-                secname+=(${section}) # record name for -l
+            elif [[ ${name} == "section" ]]; then
+                [[ ${value} == ${1} ]] && insection=1
+                secname+=(${value})
             elif [[ ${insection} == 1 ]]; then
-                # We're in the section we want, grab the values
-                var=${line%%=*}
-                var=${var// /}
-                value=${line#*=}
-                value=${value# }
-                [[ ${var} == ${2} ]] && v=${value}
+                if [[ ${name} == ${2} ]]; then
+                    v=${value};
+                fi
             fi
             continue
-        done < "${f}"
+        done < ${f}
     done
 
-    if [[ ${1} == -l ]]; then
-        echo "${secname[@]}"
+    if [[ "-l" == ${1} ]]; then
+        echo "${(@)secname}"
     else
         echo "${v}"
+    fi
+}
+
+_parsesetsconf() {
+    [[ -d ${1} ]] || continue
+
+    local v f places sections setsconf insection section arr;
+
+    if [[ -d ${1}/sets ]]; then
+        setsconf=(${1}/sets/*.conf(N));
+       [[ (($#setsconf > 0)) ]] && places=(${setsconf})
+    elif [[ -f ${1}/sets.conf ]]; then
+        places=(${1}/sets.conf)
+    fi
+
+    for f in ${(@)places}; do
+        if [[ -r ${f} ]]; then
+            insection=0;
+            declare -A arr;
+            IFS='= ';
+            while read -r name value; do
+                [[ -z ${name} || ${name} == '#'* ]] && continue
+
+                if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+                    value=${name//(\]|\[)};
+                    name="section";
+                fi;
+                arr[${name}]=${value};
+
+                if [[ ${insection} == 1 && ${name} == "section" ]]; then
+                    [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+                    insection=0;
+                elif [[ ${name} == "section" ]]; then
+                    [[ ${value} =~ "${1:t} sets" ]] && insection=1
+                    [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+                elif [[ ${insection} == 1 ]]; then
+                    [[ "sets" == ${2} ]] && continue
+                    if [[ ${name} == "directory" ]]; then
+                        v=${value};
+                    fi
+                fi
+                continue
+            done < ${f}
+        fi
+    done
+
+    if [[ "sets" == ${2} ]]; then
+        [[ ((${#sections} > 0)) ]] && echo ${(@)sections}
+    else
+        [[ ((${#v} > 0)) ]] && echo ${v:t};
+    fi
+}
+
+_get_installed_sets() {
+    local sets;
+    sets=($(</var/lib/portage/world_sets));
+    if [[ ((${#sets} > 0)) ]]; then
+        echo "${(o@)^sets}"
+    fi
+}
+
+_get_available_sets() {
+    trees=($(_portdir -o) /etc/portage /usr/share/portage/config)
+    for PORTDIR in ${(@)trees}; do
+        if [[ -d ${PORTDIR} ]]; then
+            setsdir="$(_parsesetsconf ${PORTDIR})"
+            [[ ! -z "${setsdir}" ]] && setspath="${PORTDIR}/${setsdir}" || setspath="${PORTDIR}/sets"
+            if [[ -d "${setspath}" ]]; then
+                setsfiles=(${setspath}/*~*.conf(N))
+                for set in ${setsfiles[@]}; do
+                    sets+=(${set}(:t))
+                done;
+                sets+=($(_parsesetsconf ${PORTDIR} sets))
+            fi
+        fi
+    done
+    if [[ ((${#sets} > 0)) ]]; then
+        echo "@${(o@)^sets}"
     fi
 }
 
@@ -90,13 +166,13 @@ _gentoo_packages_update_useflag(){
     local flags trees
 
     flags=()
-    trees=( $(_portdir) $(_portdir -o) )
+    trees=($(_portdir) $(_portdir -o))
 
     for PORTDIR in ${trees[@]}; do
        [[ -r ${PORTDIR}/profiles/use.desc ]] &&
-        flags+=( ${${(M)${(f)"$(<$PORTDIR/profiles/use.desc)"}:#* - *}%% - *} )
+        flags+=(${${(M)${(f)"$(<$PORTDIR/profiles/use.desc)"}:#* - *}%% - *})
        [[ -r ${PORTDIR}/profiles/use.local.desc ]] &&
-        flags+=( ${${${(M)${(f)"$(<$PORTDIR/profiles/use.local.desc)"}#* - *}%% - *}#*:} )
+        flags+=(${${${(M)${(f)"$(<$PORTDIR/profiles/use.local.desc)"}#* - *}%% - *}#*:})
     done
 
     compadd $flags
@@ -115,7 +191,7 @@ _gentoo_packages_update_active_useflag(){
 _gentoo_packages_update_category(){
     local trees category
 
-    trees=( $(_portdir) $(_portdir -o) )
+    trees=($(_portdir) $(_portdir -o))
     category=( $trees/*-*(/:t) )
     _wanted cat_packages expl 'category' compadd "$@" $category
 }
@@ -125,8 +201,11 @@ _gentoo_packages_update_installed(){
    installed_dir="/var/db/pkg"
    installed_portage=($installed_dir/*-*/*)
 
-   installed_pkgname=( ${${installed_portage:t}%%-[0-9]*} )
-   _wanted packages expl 'category/package' compadd "$@" ${installed_pkgname}
+   installed_sets=($(_get_installed_sets))
+   _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^installed_sets}"
+
+   installed_pkgname=(${${installed_portage:t}%%-[0-9]*})
+   _wanted packages expl 'package' compadd "$@" ${installed_pkgname}
 
    installed_list=( ${${installed_portage#$installed_dir/}%%-[0-9]*} )
    _wanted cat_packages expl 'category/package' _multi_parts "$@" / installed_list
@@ -138,7 +217,7 @@ _gentoo_packages_update_installed_versions(){
     installed_portage=(/var/db/pkg/*-*/*)
     _wanted packages expl 'package' compadd "$@" ${installed_portage:t}
 
-    installed_list=( ${installed_portage##*/pkg/} )
+    installed_list=(${installed_portage##*/pkg/})
     _wanted cat_packages expl 'category/package' _multi_parts "$@" / installed_list
 }
 
@@ -156,6 +235,9 @@ _gentoo_packages_update_available(){
 
     trees=( $(_portdir) $(_portdir -o) )
     category=( $trees/*-*(/:t) )
+
+    available_sets=( $(_get_available_sets) )
+    _wanted available_sets expl 'available sets' compadd  "${@}" "${(@)available_sets}"
 
     packages=( $trees/*-*/*(:t) )
     _wanted packages expl 'package' compadd  - "${(@)packages}"
