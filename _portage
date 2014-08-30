@@ -60,21 +60,21 @@ _quickpkg () {
 # Stuff for emerge
 
 _emerge () {
-    local nopkg_opts all noask_opts bopts install_args common_args profiles
+  local nopkg_opts all noask_opts bopts install_args common_args profiles
 
   noask_opts=(-p -a --pretend --ask --regen --info --search -s --searchdesc \
-  -S --version -V --help -h --metadata)
+  -S --version -V --help -h --metadata --check-news)
 
   nopkg_opts=(--resume --skipfirst -c --clean -h --help --depclean --info \
   --metadata -P --prune --regen -s --search -S --searchdesc --sync -C \
-  --unmerge -V --version -i --inject)
+  --unmerge -V --version -i --inject --list-sets --deselect --check-news)
 
   bopts=($nopkg_opts -b --buildpkg -B --buildpkgonly -G --getbinpkgonly -g \
   --getbinpkg -k --usepkg -K --usepkgonly --fetch-all-uri -f -F --fetchonly)
 
   all=($bopts -l --changelog --columns --deep -D --emptytree -e --newuse \
   --noconfmem --nodeps -O --noreplace -n --oneshot -1 -o --onlydeps --tree -t \
-  -u --update -U --upgradeonly)
+  -u --update -U --upgradeonly --config)
 
   common_args=(
     "($noask_opts --sync)"{-p,--pretend}"[Simply  display  what would be done]"
@@ -83,15 +83,73 @@ _emerge () {
     '(--quiet -q --verbose -v)'{-q,--quiet}'[General outcome is a reduced or condensed output]'
     '(--verbose -v --quiet -q)'{-v,--verbose}'[Tell emerge to run in verbose mode]'
     '--nospinner[Disables the spinner for the session]'
-    #'--deselect[--deselect=n Remove atom from world file]'
-    '--deselect=[Remove atom from world file]'
+    '(: -)'{-h,--help}'[Displays help]'
+    "(: -)--config[Run package specific actions needed to be executed after the emerge process has completed]:installed atom:_gentoo_packages installed"
+    "(: -)--list-sets[Displays a list of available package sets]"
+	"--color=[Color output]:yes/no:((y\:'yes' n\:'no'))"
+	"--accept-properties=[Temporarily override the ACCEPT_PROPERTIES variable]"
+	"--accept-restrict=[Temporarily override the ACCEPT_RESTRICT variable]"
+	"($noask_opts)"{-A,--alert=}"[Add a terminal bell to all interactive prompts]:yes/no:((y\:'yes' n\:'no'))"
+	"--ignore-default-opts[Ignore EMERGE_DEFAULT_OPTS]"
+	"--moo[Have you mooed today?]"
   )
   install_args=(
-    "($bopts)"{-b,--buildpkg}"[Tells emerge to build binary packages]"
+	'--deselect=[Remove atom from world file]:yes/no:((y\:'yes' n\:'no'))'
+	"--alphabetical[Sort use/other flags output alphabetically despite of status]"
+	"--ask-enter-invalid[When with --ask, interpret a single 'Enter' key press as invalid input]"
+	"--autounmask[Automatically unmask packages and generate package.use]:yes/no:((y\:'yes' n\:'no'))"
+	"--autounmask-unrestricted-atoms[Use >= for autounmask if possible]:yes/no:((y\:'yes' n\:'no'))"
+	"--autounmask-keep-masks[Don't unmask hardmasks and unkeyworded (live)]:yes/no:((y\:'yes' n\:'no'))"
+	"--autounmask-write[Automatically write autounmask changes (respect CONFIG_PROTECT)]:yes/no:((y\:'yes' n\:'no'))"
+	"--backtrack=[Number of times to backtrack if dependency calculation fails]:number:(0 10 30)"
+	"--binpkg-respect-use=[Ignore binary packages if their uses don't match current config]:yes/no:((y\:'yes' n\:'no'))"
+	"--complete-graph=[Consider the deep dependencies of all packages from the world set]:yes/no:((y\:'yes' n\:'no'))"
+	"--complete-graph-if-new-use=[--complete-graph if USE or IUSE will change for an installed package]:yes/no:((y\:'yes' n\:'no'))"
+	"--complete-graph-if-new-ver=[--complete-graph if an installed package version will change]:yes/no:((y\:'yes' n\:'no'))"
+	"--config-root=[Set PORTAGE_CONFIGROOT variable]:root path:_files -/"
+	"--depclean-lib-check=[Check library link-level dependencies]:yes/no:((y\:'yes' n\:'no'))"
+	"--digest[Prevent corruption from being noticed]"
+	"--dynamic-deps=[Substitute the dependencies of installed packages with the dependencies of corresponding unbuilt ebuilds]:yes/no:((y\:'yes' n\:'no'))"
+	"--fail-clean=[Clean up temporary files after a build failure]:yes/no:((y\:'yes' n\:'no'))"
+	"--ignore-built-slot-operator-deps=[Ignore the slot/sub-slot dependencies for built pkg]:yes/no:((y\:'yes' n\:'no'))"
+	"(: $nopkg_opts)"{-j,--jobs=}"[Number of packages to build simultaneously]:jobs:({1.."${#${$(</proc/cpuinfo)/^processor}}"})"
+	"--keep-going[Continue as much as possible after an error]:yes/no:((y\:'yes' n\:'no'))"
+	"--load-average[No new builds should be started if there are other builds running and the load average is at least VALUE]"
+	"--misspell-suggestions[Enable or disable misspell suggestions]:yes/no:((y\:'yes' n\:'no'))"
+	"--newrepo[Recompile a package if it is now being pulled from a different repository]"
+	"--usepkg-exclude[Ignore matching binary packages]:installed atom:_gentoo_packages installed"
+	"--rebuild-exclude[Do not rebuild matching packages on --rebuild]:installed atom:_gentoo_packages installed"
+	"--rebuild-ignore[Do not rebuild packages that depend on matching packages on --rebuild]:installed atom:_gentoo_packages installed"
+	"--package-moves[Perform package moves when necessary]:yes/no:((y\:'yes' n\:'no'))"
+	"--pkg-format[Binary package format]:archive type:(tar rpm)"
+	"--prefix=[Set EPREFIX env variable]:prefix path:_files -/"
+	"--quiet-build=[Redirect all build output to logs]:yes/no:((y\:'yes' n\:'no'))"
+	"--quiet-fail=[Suppresses display of the build log on stdout]:yes/no:((y\:'yes' n\:'no'))"
+	"--quiet-repo-display[Suppress ::repository in output (and use numbers)]"
+	"--quiet-unmerge-warn[Disable the warning message on --unmerge and friends]"
+	"--rebuild-if-new-slot[Automatically rebuild or reinstall packages when dependencies can be satisfied by a newer slot]:yes/no:((y\:'yes' n\:'no'))"
+	"--rebuild-if-new-rev[Rebuild packages when build-time dependencies are built from source, if the dependency is not already installed with the same version and revision]:yes/no:((y\:'yes' n\:'no'))"
+	"--rebuild-if-new-ver[Rebuild packages when build-time dependencies are built from source, if the dependency is not already installed with the same version]:yes/no:((y\:'yes' n\:'no'))"
+	"--rebuild-if-unbuilt[Rebuild packages when build-time dependencies are built from source]:yes/no:((y\:'yes' n\:'no'))"
+	"--rebuilt-binaries[Replace installed packages with binary packages that have been rebuilt]:yes/no:((y\:'yes' n\:'no'))"
+	"--rebuilt-binaries-timestamp[Only binaries older than TIMESTAMP will be considered by the rebuilt-binaries logic]:TIMESTAMP"
+	"--reinstall[Alias for --changed-use (currently)]:reinstall opts:(changes-use)"
+	"--reinstall-atoms[Treat matching packages as if they are not installed]:installed atoms:_gentoo_packages installed"
+	"--root=[Set ROOT env variable]:prefix path:_files -/"
+	"(: $nopkg_opts)"{-w,--select=}"[Add specified packages to the world set (inverse of --oneshot)]:yes/no:((y\:'yes' n\:'no'))"
+	"--selective=[Use --selective=n if you want to forcefully disable --selective, regardless of options like --changed-use, --newuse, --noreplace, or --update]:yes/no:((y\:'yes' n\:'no'))"
+	"--unordered-display[Produce more readable package tree with --tree]"
+	"--use-ebuild-visibility[Use unbuilt ebuild metadata for visibility checks on built packages]:yes/no:((y\:'yes' n\:'no'))"
+	"--useoldpkg-atoms[Prefer matching binary packages over newer unbuilt packages]:available atom:_gentoo_packages available"
+    "($bopts)"{-b,--buildpkg=}"[Tells emerge to build binary packages]:(y n)"
+    "($bopts)--buildpkg-exclude[Space separated list of package atoms for which no binary packages should be built]"
+	"($bopts)--exclude[Space separated list of package names or slot atoms which should not be installed]"
     "($bopts)"{-B,--buildpkgonly}"[Tells emerge to only build binary packages]"
     "($nopkg_opts --emptytree -e -l --changelog --usepkgonly -K)"{-l,--changelog}"[This will show the ChangeLog]"
     "($nopkg_opts -t --tree)--columns[Displays versions in aligned format]"
-    "($nopkg_opts -D --deep)"{-D,--deep}"[Consider the entire dependency tree of packages]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use)"{-D,--deep}"[Consider the entire dependency tree of packages]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use)"{-N,--newuse}"[Include installed packages where any USE flags have changed since compilation.]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use)--changed-use[Include installed packages where enabled USE flags have changed since installation]"
     "($nopkg_opts -e -l --changelog --emptytree)"{-e,--emptytree}"[Only consider glibc as installed packages]"
     "($all --nospinner --pretend -p)"{-i,--inject}"[Portage thinks that this package is installed]"
     "($nopkg_opts $bopts)"{-f,--fetchonly}"[Just perform fetches for all packages]"
@@ -108,9 +166,8 @@ _emerge () {
     "($nopkg_opts --upgradeonly -U)"{-U,--upgradeonly}"[Do not update packages to a lower version]"
     "($bopts)"{-k,--usepkg}"[Tells emerge to use binary packages if available]"
     "($bopts --changelog -l)"{-K,--usepkgonly}"[Tells emerge to use binary packages only]"
-    "($all)"{-c,--clean}"[Cleans the system by removing packages]"
-    '(: -)'{-h,--help}'[Displays help]:subject:(sync config system)'
-    "(: $all)--depclean[Clean all packages that have no reason for being installed]"
+    "($all)--clean[Cleans the system by removing packages]"
+    "(: $all)"{-c,--depclean}"[Clean all packages that have no reason for being installed (see man!!!)]"
     "(: $all $noask_opts --nospinner --quiet -q)--info[This is a list of information to include in bug reports]"
     "(: -)--metadata[Generate metadata]"
     "($nopkg_opts --usepkgonly -K)--newuse[Include installed packages which have changed USE flags]"
@@ -119,6 +176,7 @@ _emerge () {
     "(: $all $noask_opts --verbose -v)"{-s,--search}"[Searches for matches]"
     "(: $all $noask_opts --verbose -v)"{-S,--searchdesc}"[Matches the seachdesc string against the description field]"
     "(: $all --pretend -p)--sync[Initiates a portage tree update]"
+    "(: $all --pretend -p)--check-news[Scan all repositories for relevant unread GLEP 42 news items]"
     "($all)"{-C,--unmerge}"[Removes all matching packages]"
     '(: -)'{-V,--version}'[Display version info]'
     "(: $all[3,-1])--resume[Resumes the last merge operation]"
@@ -139,6 +197,7 @@ _emerge () {
 	    _arguments -s \
 		"$common_args[@]" "$install_args[@]" \
 		"*:installed package:_gentoo_packages installed" \
+		"::installed sets:_gentoo_packages installed_sets" \
 		&& return 0
 	fi
 
@@ -152,14 +211,10 @@ _emerge () {
 	"$common_args[@]" "$install_args[@]" \
 	'*:binary package:_gentoo_packages binary' && return 0
 
-  elif [[ $words[-3] == (--help|-h) ]] ; then
-      _message "No more arguments" && return 0
-
   else
 	if compset -P '(\\|)(>=|<=|<|>|=)'; then
 	    _arguments \
 		"*:portage:_gentoo_packages available_versions" && return 0
-
 	elif (( $words[(I)(--inject|-i)] )) ; then
 	    _arguments -s \
 		"$common_args[@]" "$install_args[@]" \
@@ -169,6 +224,7 @@ _emerge () {
 		"$common_args[@]" "$install_args[@]" \
 		"($nopkg_opts)::portage: _values 'profile' \$profiles[@] " \
 		"($nopkg_opts)*:portage:_gentoo_packages available" \
+		"($nopkg_opts)::available sets:_gentoo_packages available_sets" \
 		&& return 0
 	fi
   fi

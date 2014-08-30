@@ -133,15 +133,15 @@ _parsesetsconf() {
     fi
 }
 
-_get_installed_sets() {
+_gentoo_packages_update_installed_sets() {
     local sets;
     sets=($(</var/lib/portage/world_sets));
     if [[ ((${#sets} > 0)) ]]; then
-        echo "${(o@)^sets}"
+         _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^sets}"
     fi
 }
 
-_get_available_sets() {
+_gentoo_packages_update_available_sets() {
     trees=($(_portdir -o) /etc/portage /usr/share/portage/config)
     for PORTDIR in ${(@)trees}; do
         if [[ -d ${PORTDIR} ]]; then
@@ -157,7 +157,7 @@ _get_available_sets() {
         fi
     done
     if [[ ((${#sets} > 0)) ]]; then
-        echo "@${(o@)^sets}"
+         _wanted available_sets expl 'available set' compadd "$@" "@${(o@)^sets}"
     fi
 }
 
@@ -201,9 +201,6 @@ _gentoo_packages_update_installed(){
    installed_dir="/var/db/pkg"
    installed_portage=($installed_dir/*-*/*)
 
-   installed_sets=($(_get_installed_sets))
-   _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^installed_sets}"
-
    installed_pkgname=(${${installed_portage:t}%%-[0-9]*})
    _wanted packages expl 'package' compadd "$@" ${installed_pkgname}
 
@@ -224,22 +221,19 @@ _gentoo_packages_update_installed_versions(){
 _gentoo_packages_update_available_pkgnames_only(){
     local trees packages
 
-    trees=( $(_portdir) $(_portdir -o) )
+    trees=($(_portdir) $(_portdir -o))
 
-    packages=( $trees/*-*/*(:t) )
+    packages=($trees/*-*/*(:t))
     _wanted packages expl 'package' compadd  - "${(@)packages}"
 }
 
 _gentoo_packages_update_available(){
     local trees category packages pkg expl
 
-    trees=( $(_portdir) $(_portdir -o) )
-    category=( $trees/*-*(/:t) )
+    trees=($(_portdir) $(_portdir -o))
+    category=($trees/*-*(/:t))
 
-    available_sets=( $(_get_available_sets) )
-    _wanted available_sets expl 'available sets' compadd  "${@}" "${(@)available_sets}"
-
-    packages=( $trees/*-*/*(:t) )
+    packages=($trees/*-*/*(:t))
     _wanted packages expl 'package' compadd  - "${(@)packages}"
 
     # Complete cat/pkg. _multi_parts is much to slow for such a large task,
@@ -250,7 +244,7 @@ _gentoo_packages_update_available(){
         _wanted cat_packages expl 'category/package' compadd -S '/' $category
     else
         compset -P '*/'
-        pkg=( $trees/$IPREFIX/*(:t) )
+        pkg=($trees/$IPREFIX/*(:t))
         _wanted cat_packages expl 'category/package' compadd $pkg
     fi
 }
@@ -261,14 +255,14 @@ _gentoo_packages_update_available_versions(){
     PORTDIR=$(_portdir)
     PORTDIR_OVERLAY=$(_portdir -o);
 
-    trees=( $PORTDIR $=PORTDIR_OVERLAY )
-    category=( $trees/*-*(/:t) )
+    trees=($PORTDIR $=PORTDIR_OVERLAY)
+    category=($trees/*-*(/:t))
     typeset -U category
 
-    if [[  $#PREFIX -ge 1  &&  -z $words[(r)(--inject|-i)]  ]] ; then
+    if [[ $#PREFIX -ge 1  &&  -z $words[(r)(--inject|-i)] ]] ; then
         overlay_ebuilds=($=PORTDIR_OVERLAY/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
         portage_ebuilds=($PORTDIR/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
-        _wanted packages expl 'package'  compadd  $portage_ebuilds $overlay_ebuilds
+        _wanted packages expl 'package' compadd $portage_ebuilds $overlay_ebuilds
     fi
     pkg=( $trees/${PREFIX%%/*}/*/*.ebuild(:t:r) )
     _wanted cat_packages expl 'category/package' _sep_parts category / pkg
@@ -294,11 +288,11 @@ _gentoo_packages () {
     if [[ -z "$update_policy" ]]; then
         zstyle ":completion:*:*:$service:*" cache-policy _gentoo_cache_policy
     fi
-    [[ "$command" == (installed(_versions|)|available(_versions|)|binary|category|(active_|)useflag|available_pkgnames_only) ]] || {
+    [[ "$command" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
         _message "unknown command: $command"
         return
     }
-    [[ "$pkgset" ==  (installed(_versions|)|available(_versions|)|binary|category|(active_|)useflag|available_pkgnames_only) ]] || {
+    [[ "$pkgset" ==  (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
         pkgset="$command"
     }
     expl=("${(@)argv[1,-2]}")
