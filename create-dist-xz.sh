@@ -3,10 +3,10 @@
 : ${TAR:=$(which tar)}
 
 EXTRA_DIST="AUTHORS"
-COMPLETION_WIDGETS="_eselect _gcc-config _genlop _gentoolkit _gentoo_packages _layman _portage _portage_utils"
+COMPLETION_WIDGETS="_eselect _gcc-config _genlop _gentoolkit _gentoo_packages _layman _openrc _portage _portage_utils"
 
 snapshot_date="$(date +%Y%m%d)"
-snapshot_dir="zsh-completion-${snapshot_date}"
+snapshot_dir="gentoo-zsh-completions-${snapshot_date}"
 
 if [[ -d ${snapshot_dir} ]]; then
 	rm -rf ${snapshot_dir}
