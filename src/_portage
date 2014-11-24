@@ -92,7 +92,7 @@ _emerge () {
 	"($noask_opts)"{-A,--alert}"[Add a terminal bell to all interactive prompts]"
 	"--ignore-default-opts[Ignore EMERGE_DEFAULT_OPTS]"
 	"--moo[Have you mooed today?]"
-	"(--jobs)"{--jobs=}"[Number of packages to build simultaneously]:jobs:({1.."${#${$(</proc/cpuinfo)/^processor}}"})"
+	"(--jobs)--jobs[Number of packages to build simultaneously]:jobs:({1.."${#${$(</proc/cpuinfo)/^processor}}"})"
   )
   install_args=(
 	"--deselect[Remove atom from world file]"
