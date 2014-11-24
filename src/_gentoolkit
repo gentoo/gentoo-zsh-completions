@@ -31,7 +31,7 @@ _euse () {
     {'(--active)-a','(-a)--active'}'[show currently active useflags and their origin]'
     {'(--enable)-E','(-E)--enable'}'[enable the given useflags]'
     {'(--disable)-D','(-D)--disable'}'[disable the given useflags]'
-    {'(--prune)-P','(-P)--prune'}'[show version]'
+    {'(--prune)-P','(-P)--prune'}'[alias for --remove]'
   )
   suboptions_args=(
     {'(--global)-g','(-g)--global'}'[show only global use flags]'
