@@ -28,10 +28,13 @@ _euse () {
     {'(--help)-h','(-h)--help'}'[show help]'
     {'(--version)-v','(-v)--version'}'[show version]'
     {'(--info)-i','(-i)--info'}'[show descriptions for the given useflags]'
+    {'(--info-installed)-I','(-I)--info-installed'}'[show descriptions for the given useflags and their current impact on the installed system]'
     {'(--active)-a','(-a)--active'}'[show currently active useflags and their origin]'
     {'(--enable)-E','(-E)--enable'}'[enable the given useflags]'
     {'(--disable)-D','(-D)--disable'}'[disable the given useflags]'
+    {'(--remove)-R','(-R)--remove'}'[remove all references to the given flags from make.conf and package.use to revert to default settings]'
     {'(--prune)-P','(-P)--prune'}'[alias for --remove]'
+    {'(--package)-p','(-p)--package'}'[used with -E, -D, and -R to apply to a specific package only]'
   )
   suboptions_args=(
     {'(--global)-g','(-g)--global'}'[show only global use flags]'
