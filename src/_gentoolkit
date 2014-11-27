@@ -108,6 +108,8 @@ _equery () {
 		  '(-l --latest)'{-l,--latest}'[only display latest ChangeLog entry]' \
 		  '(-f --full)'{-f,--full}'[display full ChangeLog entry]' \
 		  '--limit[limit the number of entries displayed (with --full)]:number:' \
+		  '--from[which version to display from]' \
+		  '--to[which version to display to]' \
 		  ':portage:_packages available' && ret=0
 		;;
 	    check|k)
@@ -150,6 +152,7 @@ _equery () {
 	    hasuse|h)
 		_arguments \
 		  $common_args \
+		  '(-F --format)'{-F,--format}'[specify a custom output format]:format template' \
 		  ':useflag:_gentoo_packages useflag' && ret=0
 		;;
 	    list|l)
