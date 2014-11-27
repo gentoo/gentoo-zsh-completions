@@ -167,7 +167,7 @@ _emerge () {
     "($bopts)"{-k,--usepkg}"[Tells emerge to use binary packages if available]"
     "($bopts --changelog -l)"{-K,--usepkgonly}"[Tells emerge to use binary packages only]"
     "($all)--clean[Cleans the system by removing packages]"
-    "(: $all)"{-c,--depclean}"[Clean all packages that have no reason for being installed (see man!!!)]"
+    "($all)"{-c,--depclean}"[Clean selected packages/all packages that have no reason for being installed (see man!!!)]"
     "(: $all $noask_opts --nospinner --quiet -q)--info[This is a list of information to include in bug reports]"
     "(: -)--metadata[Generate metadata]"
     "($nopkg_opts --usepkgonly -K)--newuse[Include installed packages which have changed USE flags]"
@@ -189,7 +189,7 @@ _emerge () {
 
 
   # Dispatch
-  if (( $words[(I)(--(unmerge|clean|prune|deselect)|-[[:alpha:]]#(C|c|P)[[:alpha:]]#)] )) ; then
+  if (( $words[(I)(--(unmerge|(dep|)clean|prune|deselect)|-[[:alpha:]]#(C|c|P)[[:alpha:]]#)] )) ; then
 	if compset -P '(\\|)(>=|<=|<|>|=)'; then
 	    _arguments -s \
 		'*:installed package:_gentoo_packages installed_versions' && return 0
