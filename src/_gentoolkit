@@ -76,9 +76,8 @@ _equery () {
   )
 
   common_args=(
-    '(-i --installed -I --exclude-installed)'{-i,--installed}'[search installed packages]'
-    '(-I --exclude-installed -i --installed)'{-I,--exclude-installed}'[do not search installed packages]'
-    '(-p --portage)'{-p,--portage-tree}'[also search in portage tree]'
+    '(-I --exclude-installed)'{-I,--exclude-installed}'[do not search installed packages]'
+    '(-p --portage-tree)'{-p,--portage-tree}'[also search in portage tree]'
     '(-o --overlay-tree)'{-o,--overlay-tree}'[also search in overlay tree]'
   )
 
@@ -99,47 +98,54 @@ _equery () {
 	    case "$cmd" in
 	    belongs|b)
 		_arguments \
-		  '(-c --category)'{-c,--category}'[only search in specified category]:category:_gentoo_packages category' \
-		  '(-e --earlyout)'{-e,--earlyout}'[stop when first match found]' \
-		  '(-f --full-regex)'{-f,--full-regex}'[supplied query is a full regex]:pattern:' \
+		  '(-e --early-out)'{-e,--early-out}'[stop when first match found]' \
+		  '(-f --full-regex)'{-f,--full-regex}'[supplied query is a regex]:pattern:' \
+		  '(-n --name-only)'{-n,--name-only}"[don't print the version]" \
 		  '*:file:_files' && ret=0
+		;;
+	    changes|c)
+		_arguments \
+		  '(-l --latest)'{-l,--latest}'[only display latest ChangeLog entry]' \
+		  '(-f --full)'{-f,--full}'[display full ChangeLog entry]' \
+		  '--limit[limit the number of entries displayed (with --full)]:number:' \
+		  ':portage:_packages available' && ret=0
 		;;
 	    check|k)
 		_arguments \
+		  '(-f --full-regex)'{-f,--full-regex}'[supplied query is a regex]:pattern:' \
+		  '(-o --only-failures)'{-o,--only-failures}'[only display packages that do not pass]' \
 		  ':portage:_packages installed' && ret=0
 		;;
 	    depends|d)
 		_arguments \
 		  '(-a --all-packages)'{-a,--all-packages}'[search in all available packages (slow)]:all packages:->packages' \
-		  '(-d --direct -D --indirect)'{-d,--direct}'[search direct dependencies only (default)]' \
-		  '(-d --direct -D --indirect)'{-D,--indirect}'[search indirect dependencies (VERY slow)]' \
+		  '(-D --indirect)'{-D,--indirect}'[search indirect dependencies (VERY slow)]' \
+		  '--depth[limit indirect dependency tree to specified depth]:number:' \
 		  '*:package:_packages installed' && ret=0
 		;;
 	    depgraph|g)
 		_arguments \
+		  '(-A --no-atom)'{-A,--no-atom}'[do not show dependency atom]' \
+		  '(-M --no-mask)'{-M,--no-mask}'[do not show masking status]' \
 		  '(-U --no-useflags)'{-U,--no-useflags}'[do not show USE flags]' \
 		  '(-l --linear)'{-l,--linear}'[do not use fancy formatting]' \
 		  ':package:_packages installed' && ret=0
 		;;
 	    files|f)
 		_arguments \
-		 '--timestamp[append timestamp]' \
-		 '--md5sum[append md5sum]' \
-		 '--type[prepend file type]' \
+		 '(-m --md5sum)'{-m,--md5sum}'[include MD5 sum in output]' \
+		 '(-s --timestamp)'{-s,--timestamp}'[include timestamp in output]' \
+		 '(-t --type)'{-t,--type}'[include file type in output]' \
+		 '--tree[display results in a tree (turns off other options)]' \
 		 '--filter=[filter output]:filter(s):_values -s , '' dir obj sym dev fifo path conf cmd doc man info' \
 		 ':installed pkgname:_packages installed' && ret=0
 		;;
-	    meta|m)
+	    has|a)
 		_arguments \
-		  '(-d --description)'{-d,--description}'[show an extended package description]' \
-		  '(-H --herd)'{-H,--herd}'[show the herd(s) for the package]' \
-		  '(-k --keywords)'{-k,--keywords}'[show keywords for all matching package versions]' \
-		  '(-m --maintainer)'{-m,--maintainer}'[show the maintainer(s) for the package]' \
-		  '(-S --stablreq)'{-S,--stablreq}'[show STABLEREQ arches (ccs) for all matching package versions]' \
-		  '(-u --useflags)'{-u,--useflags}'[show per-package USE flag descriptions]' \
-		  '(-U --upstream)'{-U,--upstream}'[show packages upstream information]' \
-		  '(-x --xml)'{-x,--xml}'[show the plain metadata.xml file]' \
-		  ':package:_packages available' && ret=0
+		  $common_args \
+		  '(-F --format)'{-F,--format}'[a format template (see man page)]:format template' \
+		  ':KEY:' \
+		  ':VALUE:' && ret=0
 		;;
 	    hasuse|h)
 		_arguments \
@@ -149,29 +155,45 @@ _equery () {
 	    list|l)
 		_arguments \
 		  $common_args \
+		  '(-d --duplicates)'{-d,--duplicates}'[list only installed duplicate packages]' \
+		  '(-b --binpkgs-missing)'{-b,--binpkgs-missing}'[list only installed packages without a corresponding binary package]' \
+		  '(-f --full-regex)'{-f,--full-regex}'[supplied query is a regex]:pattern:' \
+		  '(-m --mask-reason)'{-m,--mask-reason}'[include reason for package mask]' \
+		  '(-F --format)'{-F,--format}'[a format template (see man page)]:format template' \
 		  ': :_guard "^--*" pattern' && ret=0
-    		;;
-    	    size|s)
+		;;
+	    meta|m)
+		_arguments \
+		  '(-d --description)'{-d,--description}'[show an extended package description]' \
+		  '(-H --herd)'{-H,--herd}'[show the herd(s) for the package]' \
+		  '(-k --keywords)'{-k,--keywords}'[show keywords for all matching package versions]' \
+		  '(-l --license)'{-l,--license}'[show licenses for the best maching version]' \
+		  '(-m --maintainer)'{-m,--maintainer}'[show the maintainer(s) for the package]' \
+		  '(-S --stablreq)'{-S,--stablreq}'[show STABLEREQ arches (ccs) for all matching package versions]' \
+		  '(-u --useflags)'{-u,--useflags}'[show per-package USE flag descriptions]' \
+		  '(-U --upstream)'{-U,--upstream}'[show packages upstream information]' \
+		  '(-x --xml)'{-x,--xml}'[show the plain metadata.xml file]' \
+		  ':package:_packages available' && ret=0
+		;;
+		size|s)
 		_arguments \
 		  '(-b --bytes)'{-b,--bytes}'[report size in bytes]' \
+		  '(-f --full-regex)'{-f,--full-regex}'[supplied query is a regex]:pattern:' \
 		  ':package:_packages installed' && ret=0
-		;;
-	    which|w)
-		_arguments \
-		  ':portage:_packages available' && ret=0
 		;;
 	    uses|u)
 		 _arguments \
-		  {--all,-a}'[include non-installed packages]' \
+		  '(-a --all)'{-a,--all}'[include non-installed packages]' \
+		  '(-i --ignore-linguas)'{-i,--ignore-linguas}"[don't show linguas USE flags]" \
 		  ":portage:_packages installed" && ret=0
 		;;
-	    changes|c)
+	    which|w)
 		_arguments \
-		  '(-l --latest)'{-l,--latest}'[only display latest ChangeLog entry]' \
-		  '(-f --full)'{-f,--full}'[display full ChangeLog entry]' \
+		  '(-m --include-masked)'{-m,--include-masked}'[return highest version ebuild available]' \
+		  '(-e --ebuild)'{-e,--ebuild}'[print the ebuild]' \
 		  ':portage:_packages available' && ret=0
 		;;
-    	    *)
+	    *)
 		_message 'command not found'
 		;;
     	    esac
