@@ -181,6 +181,7 @@ _emerge () {
     '(: -)'{-V,--version}'[Display version info]'
     "(: $all[3,-1])--resume[Resumes the last merge operation]"
     "(: $all[3,-1])--skipfirst[Removes the first package in the resume list]"
+    "($all)--keep-going[Continue merge even if a package fails to build]"
   )
   profiles=(
     'world[All packages in the world profile]'
