@@ -11,7 +11,7 @@ _portdir() {
     local mainreponame mainrepopath overlayname overlaypath
 
     if [[ -e /usr/share/portage/config/repos.conf ]]; then
-        if [[ ${1} == -o ]]; then
+        if [[ ${1} == "-o" ]]; then
             for overlayname in $(_parsereposconf -l); do
                 overlaypath+=($(_parsereposconf ${overlayname} location))
             done
@@ -33,7 +33,7 @@ _portdir() {
         source /etc/make.conf 2>/dev/null
         source /etc/portage/make.conf 2>/dev/null
 
-        if [[ "-o" == ${1} ]]; then
+        if [[ ${1} == "-o" ]]; then
             echo "${(@u)PORTDIR_OVERLAY}"
         else
             echo "${PORTDIR}"
@@ -76,7 +76,7 @@ _parsereposconf() {
         done < ${f}
     done
 
-    if [[ "-l" == ${1} ]]; then
+    if [[ ${1} == "-l" ]]; then
         echo "${(@)secname}"
     else
         echo "${v}"
@@ -110,13 +110,13 @@ _parsesetsconf() {
                 arr[${name}]=${value}
 
                 if [[ ${insection} == 1 && ${name} == "section" ]]; then
-                    [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+                    [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
                     insection=0
                 elif [[ ${name} == "section" ]]; then
                     [[ ${value} =~ "${1:t} sets" ]] && insection=1
-                    [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+                    [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
                 elif [[ ${insection} == 1 ]]; then
-                    [[ "sets" == ${2} ]] && continue
+                    [[ ${2} == "sets" ]] && continue
                     if [[ ${name} == "directory" ]]; then
                         v=${value}
                     fi
@@ -126,7 +126,7 @@ _parsesetsconf() {
         fi
     done
 
-    if [[ "sets" == ${2} ]]; then
+    if [[ ${2} == "sets" ]]; then
         [[ ((${#sections} > 0)) ]] && echo ${(@)sections}
     else
         [[ ((${#v} > 0)) ]] && echo ${v:t}
