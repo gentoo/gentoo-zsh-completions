@@ -224,7 +224,7 @@ _gentoo_packages_update_available_pkgnames_only(){
     trees=($(_portdir) $(_portdir -o))
 
     packages=($trees/*-*/*(:t))
-    _wanted packages expl 'package' compadd  - "${(@)packages}"
+    _wanted packages expl 'package' compadd - "${(@)packages}"
 }
 
 _gentoo_packages_update_available(){
@@ -234,7 +234,7 @@ _gentoo_packages_update_available(){
     category=($trees/*-*(/:t))
 
     packages=($trees/*-*/*(:t))
-    _wanted packages expl 'package' compadd  - "${(@)packages}"
+    _wanted packages expl 'package' compadd - "${(@)packages}"
 
     # Complete cat/pkg. _multi_parts is much to slow for such a large task,
     # _sep_parts removes the dash from gnome-<tab>, and _path_files wants to
@@ -259,7 +259,7 @@ _gentoo_packages_update_available_versions(){
     category=($trees/*-*(/:t))
     typeset -U category
 
-    if [[ $#PREFIX -ge 1  &&  -z $words[(r)(--inject|-i)] ]] ; then
+    if [[ $#PREFIX -ge 1 && -z $words[(r)(--inject|-i)] ]] ; then
         overlay_ebuilds=($=PORTDIR_OVERLAY/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
         portage_ebuilds=($PORTDIR/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
         _wanted packages expl 'package' compadd $portage_ebuilds $overlay_ebuilds
@@ -292,7 +292,7 @@ _gentoo_packages () {
         _message "unknown command: $command"
         return
     }
-    [[ "$pkgset" ==  (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
+    [[ "$pkgset" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
         pkgset="$command"
     }
     expl=("${(@)argv[1,-2]}")

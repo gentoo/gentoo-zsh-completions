@@ -2,7 +2,7 @@
 
 # layman-1.1.1
 #
-local arguments actions_args actions global_opts add_actions 
+local arguments actions_args actions global_opts add_actions
 _layman_remote_overlays() {
 	local layman_list_overlays
 	layman_list_overlays=(${(S)${${(f)"$(layman -k -N -L 2>/dev/null)"}//\[*}#\* })

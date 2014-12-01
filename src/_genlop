@@ -2,7 +2,7 @@
 
 #genlop 0.30.8
 _genlop () {
-local prev1="$words[CURRENT-1]"  prev2="$words[CURRENT-2]" days months arg single state lstate
+local prev1="$words[CURRENT-1]" prev2="$words[CURRENT-2]" days months arg single state lstate
 days=(monday tuesday wednesday thursday friday saturday sunday)
 months=(january february march april may june july august september october november december)
 arg=( --current -c --time -t --gmt -g --info -i --file -f --rsync -r --unmerge -u --date --search -s --list -l )
@@ -12,14 +12,14 @@ single=( --current -c --pretend -p --help -h --version -v )
 		compadd in\ $months && return 0
 	[[ ${prev1} == ([2-9]|[1-9][0-9]*) && ${prev2} != \
 	(january|february|march|april|may|june|july|august|september|october|november|december) ]] &&
-		_values  '' 'days ago' 'months ago' 'years ago' 'weeks ago' && return 0
+		_values '' 'days ago' 'months ago' 'years ago' 'weeks ago' && return 0
 	[[ ${prev1} == (1) && ${prev2} != \
 	(january|february|march|april|may|june|july|august|september|october|november|december) ]] &&
-		_values  '' 'day ago' 'month ago' 'year ago' 'week ago' && return 0
+		_values '' 'day ago' 'month ago' 'year ago' 'week ago' && return 0
 
     case "$prev1" in
 	    last)
-	        _values  '' month week
+	        _values '' month week
 		compadd $days && return 0
 	;;
 	    1st|2nd|3rd|4th|5th)
@@ -28,10 +28,10 @@ single=( --current -c --pretend -p --help -h --version -v )
 	    january|february|march|april|may|june|july|august|september|october|november|december)
 		compadd {1..31} && return 0
 	;;
-	    --date) 
+	    --date)
 	        _message 'enter number for more options or use mm/dd/yyyy format'
 	        _values '' \
-		last yesterday 1st 2nd 3rd 4th 5th 
+		last yesterday 1st 2nd 3rd 4th 5th
 		_alternative \
 		'*:*:_days' '*:*:_months' && return 0
 	;;
@@ -57,27 +57,27 @@ single=( --current -c --pretend -p --help -h --version -v )
 		"($single)*:package:_gentoo_packages available"
 	;;
     esac
-	
+
     while [[ -n "$state" ]]; do
         lstate=$state
         state=''
         case "$lstate" in
 	    date) _message 'enter number for more options or use mm/dd/yyyy format'
 	    _values '' \
-		last yesterday 1st 2nd 3rd 4th 5th 
+		last yesterday 1st 2nd 3rd 4th 5th
 		_alternative \
 		':*:_days' ':*:_months' && return 0
 	    ;;
 	esac
-    done   
+    done
 }
 
 _days() {
-	local m="monday" t="tuesday" w="wednesday" T="thursday" f="friday" s="saturday" S="sunday"	
+	local m="monday" t="tuesday" w="wednesday" T="thursday" f="friday" s="saturday" S="sunday"
 	local day=$(date +%u)
 	if   [[ ${day} == 1 ]] then compadd $m
 	elif [[ ${day} == 2 ]] then compadd $m $t
-	elif [[ ${day} == 3 ]] then compadd $m $t $w	 
+	elif [[ ${day} == 3 ]] then compadd $m $t $w
 	elif [[ ${day} == 4 ]] then compadd $m $t $w $T
 	elif [[ ${day} == 5 ]] then compadd $m $t $w $T $f
 	elif [[ ${day} == 6 ]] then compadd $m $t $w $T $f $s
@@ -89,9 +89,9 @@ _months() {
 	local month=$(date +%m)
 	if   [[ ${month} == 01 ]] then compadd $j
 	elif [[ ${month} == 02 ]] then compadd $j $f
-	elif [[ ${month} == 03 ]] then compadd $j $f $m	 
+	elif [[ ${month} == 03 ]] then compadd $j $f $m
 	elif [[ ${month} == 04 ]] then compadd $j $f $m $a
-	elif [[ ${month} == 05 ]] then compadd $j $f $m $a $M 
+	elif [[ ${month} == 05 ]] then compadd $j $f $m $a $M
 	elif [[ ${month} == 06 ]] then compadd $j $f $m $a $M $ju
 	elif [[ ${month} == 07 ]] then compadd $j $f $m $a $M $ju $J
 	elif [[ ${month} == 08 ]] then compadd $j $f $m $a $M $ju $J $A

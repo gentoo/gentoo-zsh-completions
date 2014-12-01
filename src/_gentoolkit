@@ -14,7 +14,7 @@
 
 # XXX: shouldn't this go to _gentoo_package?
 _packages () {
-    if compset -P '(\\|)(>=|<=|<|>|=)'  ; then
+    if compset -P '(\\|)(>=|<=|<|>|=)' ; then
 	    _gentoo_packages ${*/(#m)(installed|available)/${MATCH}_versions}
     else
 	    _gentoo_packages $*
@@ -41,7 +41,7 @@ _euse () {
     {'(--local)-l','(-l)--local'}'[show only local use flags]'
   )
   if (( CURRENT == 2 ));then
-    _arguments -s $start_args 
+    _arguments -s $start_args
   elif (( CURRENT == 3 ));then
     case "$words[2]" in
       -i|--info|-a|--active)
@@ -265,7 +265,7 @@ _eclean_wrapper () {
                 #_values "packages options" $pkg_opts &&
                     return 0
             elif (( $words[(I)(distfiles)] )); then
-                _values "distfiles options"  $dist_opts &&
+                _values "distfiles options" $dist_opts &&
                     return 0
             else
                 _arguments -s $global_opts
@@ -404,4 +404,3 @@ case "$service" in
         _revdep-rebuild "$@" && return 0
     ;;
 esac
-
