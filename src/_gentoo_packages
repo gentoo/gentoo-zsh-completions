@@ -42,25 +42,25 @@ _portdir() {
 }
 
 _parsereposconf() {
-    local v f insection section arr;
+    local v f insection section arr
 
     for f in /usr/share/portage/config/repos.conf \
         /etc/portage/repos.conf \
         /etc/portage/repos.conf/*.conf; do
 
         [[ -f ${f} ]] || continue
-        insection=0;
-        declare -A arr;
-        IFS='= ';
+        insection=0
+        declare -A arr
+        IFS='= '
 
         while read -r name value; do
             [[ -z ${name} || ${name} == '#'* ]] && continue
 
             if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-                value=${name//(\]|\[)};
-                name="section";
-            fi;
-            arr[${name}]=${value};
+                value=${name//(\]|\[)}
+                name="section"
+            fi
+            arr[${name}]=${value}
 
             if [[ ${insection} == 1 && ${name} == "section" ]]; then
                 break
@@ -69,7 +69,7 @@ _parsereposconf() {
                 secname+=(${value})
             elif [[ ${insection} == 1 ]]; then
                 if [[ ${name} == ${2} ]]; then
-                    v=${value};
+                    v=${value}
                 fi
             fi
             continue
@@ -86,10 +86,10 @@ _parsereposconf() {
 _parsesetsconf() {
     [[ -d ${1} ]] || continue
 
-    local v f places sections setsconf insection section arr;
+    local v f places sections setsconf insection section arr
 
     if [[ -d ${1}/sets ]]; then
-        setsconf=(${1}/sets/*.conf(N));
+        setsconf=(${1}/sets/*.conf(N))
        [[ (($#setsconf > 0)) ]] && places=(${setsconf})
     elif [[ -f ${1}/sets.conf ]]; then
         places=(${1}/sets.conf)
@@ -97,28 +97,28 @@ _parsesetsconf() {
 
     for f in ${(@)places}; do
         if [[ -r ${f} ]]; then
-            insection=0;
-            declare -A arr;
-            IFS='= ';
+            insection=0
+            declare -A arr
+            IFS='= '
             while read -r name value; do
                 [[ -z ${name} || ${name} == '#'* ]] && continue
 
                 if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-                    value=${name//(\]|\[)};
-                    name="section";
-                fi;
-                arr[${name}]=${value};
+                    value=${name//(\]|\[)}
+                    name="section"
+                fi
+                arr[${name}]=${value}
 
                 if [[ ${insection} == 1 && ${name} == "section" ]]; then
                     [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
-                    insection=0;
+                    insection=0
                 elif [[ ${name} == "section" ]]; then
                     [[ ${value} =~ "${1:t} sets" ]] && insection=1
                     [[ "sets" == ${2} ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
                 elif [[ ${insection} == 1 ]]; then
                     [[ "sets" == ${2} ]] && continue
                     if [[ ${name} == "directory" ]]; then
-                        v=${value};
+                        v=${value}
                     fi
                 fi
                 continue
@@ -129,13 +129,13 @@ _parsesetsconf() {
     if [[ "sets" == ${2} ]]; then
         [[ ((${#sections} > 0)) ]] && echo ${(@)sections}
     else
-        [[ ((${#v} > 0)) ]] && echo ${v:t};
+        [[ ((${#v} > 0)) ]] && echo ${v:t}
     fi
 }
 
 _gentoo_packages_update_installed_sets() {
-    local sets;
-    sets=($(</var/lib/portage/world_sets));
+    local sets
+    sets=($(</var/lib/portage/world_sets))
     if [[ ((${#sets} > 0)) ]]; then
          _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^sets}"
     fi
@@ -151,7 +151,7 @@ _gentoo_packages_update_available_sets() {
                 setsfiles=(${setspath}/*~*.conf(N))
                 for set in ${setsfiles[@]}; do
                     sets+=(${set}(:t))
-                done;
+                done
                 sets+=($(_parsesetsconf ${PORTDIR} sets))
             fi
         fi
@@ -253,7 +253,7 @@ _gentoo_packages_update_available_versions(){
     local var overlay_ebuilds portage_ebuilds expl trees category
 
     PORTDIR=$(_portdir)
-    PORTDIR_OVERLAY=$(_portdir -o);
+    PORTDIR_OVERLAY=$(_portdir -o)
 
     trees=($PORTDIR $=PORTDIR_OVERLAY)
     category=($trees/*-*(/:t))
