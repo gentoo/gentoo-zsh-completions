@@ -7,7 +7,7 @@ _portdir() {
     local mainreponame mainrepopath overlayname overlaypath
 
     if [[ -e /usr/share/portage/config/repos.conf ]]; then
-        if [[ ${1} == -o ]]; then
+        if [[ ${1} == "-o" ]]; then
             for overlayname in $(_parsereposconf -l); do
                 overlaypath+=($(_parsereposconf ${overlayname} location))
             done
@@ -15,12 +15,9 @@ _portdir() {
             source /etc/make.conf 2>/dev/null
             source /etc/portage/make.conf 2>/dev/null
 
-            overlaypath+=(${PORTDIR_OVERLAY})
+            overlaypath+=(${(@)PORTDIR_OVERLAY})
 
-            # strip out duplicates
-            overlaypath=($(printf "%s\n" "${overlaypath[@]}" | sort -u))
-
-            echo "${overlaypath[@]}"
+            echo "${(@u)overlaypath}"
         else
             mainreponame=$(_parsereposconf DEFAULT main-repo)
             mainrepopath=$(_parsereposconf ${mainreponame} location)
@@ -32,16 +29,16 @@ _portdir() {
         source /etc/make.conf 2>/dev/null
         source /etc/portage/make.conf 2>/dev/null
 
-        echo "${PORTDIR}"
-
-        if [[ ${1} == -o ]]; then⋅
-            echo "${PORTDIR_OVERLAY}"
-        fi⋅⋅⋅
+        if [[ ${1} == "-o" ]]; then
+            echo "${(@u)PORTDIR_OVERLAY}"
+        else
+            echo "${PORTDIR}"
+        fi
     fi
 }
 
 _parsereposconf() {
-    local f insection line section v value var
+    local v f insection section arr
 
     for f in /usr/share/portage/config/repos.conf \
         /etc/portage/repos.conf \
@@ -49,34 +46,34 @@ _parsereposconf() {
 
         [[ -f ${f} ]] || continue
         insection=0
+        declare -A arr
+        IFS='= '
 
-        while read -r line; do
-            # skip comments and blank lines
-            [[ -z ${line} || ${line} == '#'* ]] && continue
+        while read -r name value; do
+            [[ -z ${name} || ${name} == '#'* ]] && continue
 
-            if [[ ${insection} == 1 && ${line} == '['*']' ]]; then
-                # End of the section we were interested in so stop
-                secname+=(${line//[(\[|\])]/}) # record name for -l
+            if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+                value=${name//(\]|\[)}
+                name="section"
+            fi
+            arr[${name}]=${value}
+
+            if [[ ${insection} == 1 && ${name} == "section" ]]; then
                 break
-            elif [[ ${line} == '['*']' ]]; then
-                # Entering a new section, check if it's the one we want
-                section=${line//[(\[|\])]/}
-                [[ ${section} == "${1}" ]] && insection=1
-                secname+=(${section}) # record name for -l
+            elif [[ ${name} == "section" ]]; then
+                [[ ${value} == ${1} ]] && insection=1
+                secname+=(${value})
             elif [[ ${insection} == 1 ]]; then
-                # We're in the section we want, grab the values
-                var=${line%%=*}
-                var=${var// /}
-                value=${line#*=}
-                value=${value# }
-                [[ ${var} == ${2} ]] && v=${value}
+                if [[ ${name} == ${2} ]]; then
+                    v=${value}
+                fi
             fi
             continue
-        done < "${f}"
+        done < ${f}
     done
 
-    if [[ ${1} == -l ]]; then
-        echo "${secname[@]}"
+    if [[ ${1} == "-l" ]]; then
+        echo "${(@)secname}"
     else
         echo "${v}"
     fi
