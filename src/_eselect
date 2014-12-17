@@ -1,197 +1,199 @@
 #compdef eselect
 
 common_values=(
-	"help[Display help text]"
-	"usage[Display usage information]"
-	"version[Display version information]"
+  "help[Display help text]"
+  "usage[Display usage information]"
+  "version[Display version information]"
 )
 
 _eselect_env () {
-	if (( $words[(I)(update)] )); then
-		_values "update options" \
-			"makelinks[force updating of links]" \
-			"noldconfig[Do not alter the ld.so cache or configuration]" && return 0
-	fi
-	_values "env options" $common_values \
-		'update[Collect environment variables from all scripts in /etc/env.d/]' && return 0
+  if (( $words[(I)(update)] )); then
+    _values "update options" \
+      "makelinks[force updating of links]" \
+      "noldconfig[Do not alter the ld.so cache or configuration]" && return 0
+  fi
+  _values "env options" $common_values \
+    'update[Collect environment variables from all scripts in /etc/env.d/]' && return 0
 }
 
 _eselect_binutils () {
-	local binutilslist
-	if (( $words[(I)(set)] )); then
-		binutilslist=(${(f)"$(eselect --brief --color=no binutils list)"})
-		_values "available binutils version" $binutilslist[@] && return 0
-	fi
-	_values "binutils options" $common_values \
-		"list[List all installed version of binutils]" \
-		"show[Print the currently active binutils version]" \
-		"set[Activate one of the installed binutils]" && return 0
+  local binutilslist
+  if (( $words[(I)(set)] )); then
+    binutilslist=(${(f)"$(eselect --brief --color=no binutils list)"})
+    _values "available binutils version" $binutilslist[@] && return 0
+  fi
+  _values "binutils options" $common_values \
+    "list[List all installed version of binutils]" \
+    "show[Print the currently active binutils version]" \
+    "set[Activate one of the installed binutils]" && return 0
 }
 
 _eselect_kernel () {
-	local kernellist
-	if (( $words[(I)(set)] )); then
-		kernellist=(${(f)"$(eselect --brief --color=no kernel list)"})
-		_values "available kernel version" $kernellist[@] && return 0
-	fi
-	_values "kernel options" $common_values \
-		"list[List available kernel symlink targets]" \
-		"show[Show the current kernel symlink]" \
-		"set[Set a new kernel symlink target]" && return 0
+  local kernellist
+  if (( $words[(I)(set)] )); then
+    kernellist=(${(f)"$(eselect --brief --color=no kernel list)"})
+    _values "available kernel version" $kernellist[@] && return 0
+  fi
+  _values "kernel options" $common_values \
+    "list[List available kernel symlink targets]" \
+    "show[Show the current kernel symlink]" \
+    "set[Set a new kernel symlink target]" && return 0
 }
 
 _eselect_ctags () {
-	local ctagslist
-	if (( $words[(I)(set)] )); then
-		ctagslist=(${(f)"$(eselect --brief --color=no ctags list)"})
-		_values "available ctags version" $ctagslist[@] && return 0
-	fi
-	_values "ctags options" $common_values \
-		"list[List available ctags symlink targets]" \
-		"show[Show the current target of the ctags symlink]" \
-		"update[Automatically update the ctags symlink]" \
-		"set[Set a new ctags symlink target]" && return 0
+  local ctagslist
+  if (( $words[(I)(set)] )); then
+    ctagslist=(${(f)"$(eselect --brief --color=no ctags list)"})
+    _values "available ctags version" $ctagslist[@] && return 0
+  fi
+  _values "ctags options" $common_values \
+    "list[List available ctags symlink targets]" \
+    "show[Show the current target of the ctags symlink]" \
+    "update[Automatically update the ctags symlink]" \
+    "set[Set a new ctags symlink target]" && return 0
 }
 
 _eselect_profile () {
-	local profilelist
-	if (( $words[(I)(set)] )); then
-		profilelist=(${${(f)"$(eselect --brief --color=no profile list)"}/:/\\:})
-		_values -w "available profiles" $profilelist[@] \
-			"--force[Forcibly set the symlink]" && return 0
-	fi
-	_values "profile options" $common_values \
-		"list[List available profile symlink targets]" \
-		"show[Show the current make.profile symlink]" \
-		"set[Set a new profile symlink target]" && return 0
+  local profilelist
+  if (( $words[(I)(set)] )); then
+    profilelist=(${${(f)"$(eselect --brief --color=no profile list)"}/:/\\:})
+    _values -w "available profiles" $profilelist[@] \
+      "--force[Forcibly set the symlink]" && return 0
+  fi
+  _values "profile options" $common_values \
+    "list[List available profile symlink targets]" \
+    "show[Show the current make.profile symlink]" \
+    "set[Set a new profile symlink target]" && return 0
 }
 
 _eselect_fontconfig () {
-	local fclistenabled fclistdisabled
-	if (( $words[(I)(enable)] )); then
-		fclistdisabled=(${${${${(M)${(f)"$(eselect --color=no fontconfig list)"}## *}#*\*}// \**/}//(  \[*\]   |  \[*\]  )/})
-		_values -w ".conf to enable" $fclistdisabled[@] && return 0
-	elif (( $words[(I)(disable)] )); then
-		fclistenabled=(${${${(M)${(M)${(f)"$(eselect --color=no fontconfig list)"}## *}#*\*}// \**/}//(  \[*\]   |  \[*\]  )/})
-		_values -w ".conf to disable" $fclistenabled[@] && return 0
-	fi
-	_values "fontconfig options" $common_values \
-		"list[List available fontconfig .conf files]" \
-		"disable[Disable specified fontconfig .conf file(s)]" \
-		"enable[Enable specified fontconfig .conf file(s)]" && return 0
+  local fclistenabled fclistdisabled
+  if (( $words[(I)(enable)] )); then
+    fclistdisabled=(${${${${(M)${(f)"$(eselect --color=no fontconfig list)"}## *}#*\*}// \**/}//(  \[*\]   |  \[*\]  )/})
+    _values -w ".conf to enable" $fclistdisabled[@] && return 0
+  elif (( $words[(I)(disable)] )); then
+    fclistenabled=(${${${(M)${(M)${(f)"$(eselect --color=no fontconfig list)"}## *}#*\*}// \**/}//(  \[*\]   |  \[*\]  )/})
+    _values -w ".conf to disable" $fclistenabled[@] && return 0
+  fi
+  _values "fontconfig options" $common_values \
+    "list[List available fontconfig .conf files]" \
+    "disable[Disable specified fontconfig .conf file(s)]" \
+    "enable[Enable specified fontconfig .conf file(s)]" && return 0
 }
 
 _eselect_opengl () {
-	local opengllist
-	if (( $words[(I)(set)] )); then
-		opengllist=(${(f)"$(eselect --brief --color=no opengl list)"})
-		_values -w "opengl implementations and options" $opengllist[@] \
-			"--use-old[If an implementation is already set, use that one instead]" \
-			"--prefix[Set the source prefix]:path:_files -/" \
-			"--dst-prefix[Set the destination prefix]:path:_files -/" \
-			"--ignore-missing[Ignore missing files when setting a new implementation]" && return 0
-	fi
-	_values "opengl options" $common_values \
-		"list[List the available OpenGL implementations]" \
-		"set[Select the OpenGL implementation]" \
-		"show[Print the current OpenGL implementation]" && return 0
+  local opengllist
+  if (( $words[(I)(set)] )); then
+    opengllist=(${(f)"$(eselect --brief --color=no opengl list)"})
+    _values -w "opengl implementations and options" $opengllist[@] \
+      "--use-old[If an implementation is already set, use that one instead]" \
+      "--prefix[Set the source prefix]:path:_files -/" \
+      "--dst-prefix[Set the destination prefix]:path:_files -/" \
+      "--ignore-missing[Ignore missing files when setting a new implementation]" && return 0
+  fi
+  _values "opengl options" $common_values \
+    "list[List the available OpenGL implementations]" \
+    "set[Select the OpenGL implementation]" \
+    "show[Print the current OpenGL implementation]" && return 0
 }
 
 _eselect_vi () {
-	local vilist
-	if (( $words[(I)(set)] )); then
-		vilist=(${(f)"$(eselect --brief --color=no vi list)"})
-		_values -w "vi implementation" $vilist[@] && return 0
-	elif (( $words[(I)(update)] )); then
-		_values -w "option" "--if-unset[Do not override existing implementation]" && return 0
-	fi
-	_values "vi options" $common_values \
-		"list[List available vi implementations]" \
-		"set[Set a new vi implementation provider]" \
-		"show[Show the current vi implementation]" \
-		"update[Automatically update the vi provider]"
+  local vilist
+  if (( $words[(I)(set)] )); then
+    vilist=(${(f)"$(eselect --brief --color=no vi list)"})
+    _values -w "vi implementation" $vilist[@] && return 0
+  elif (( $words[(I)(update)] )); then
+    _values -w "option" "--if-unset[Do not override existing implementation]" && return 0
+  fi
+  _values "vi options" $common_values \
+    "list[List available vi implementations]" \
+    "set[Set a new vi implementation provider]" \
+    "show[Show the current vi implementation]" \
+    "update[Automatically update the vi provider]"
 }
 
 _eselect_news() {
 
-	## TODO: Normal numeric sorting.
-	## I've spent many time on trying to rewrite this
-	## function to normally sort (to DO NOT sort, actually) items,
-	## but it growing bigger and bigger and going to be too complicated.
-	## So, I (mva) either need to help to make it in the "right way".
-	## Or, maybe, to completely rewrite this compdef.
+  ## TODO: Normal numeric sorting.
+  ## I've spent many time on trying to rewrite this
+  ## function to normally sort (to DO NOT sort, actually) items,
+  ## but it growing bigger and bigger and going to be too complicated.
+  ## So, I (mva) either need to help to make it in the "right way".
+  ## Or, maybe, to completely rewrite this compdef.
 
-	local -a newslist;
-	if ((CURRENT == 3)); then
-		_values 'news options' $stdopts[@] \
-		'list[List news items]' \
-		'count[Display number of news items]' \
-		'purge[Purge read news]' \
-		'read[Read news items]' \
-		'unread[Mark read news items as unread again]' && return 0
-	elif ((CURRENT == 4)); then
-		if (( $words[(I)(count)] )); then
-		_values -w 'news' 'new[Count only new news items]' 'all[Count all news items]' && return 0
-		fi
+  local -a newslist;
+  if ((CURRENT == 3)); then
+    _values 'news options' $stdopts[@] \
+    'list[List news items]' \
+    'count[Display number of news items]' \
+    'purge[Purge read news]' \
+    'read[Read news items]' \
+    'unread[Mark read news items as unread again]' && return 0
+  elif ((CURRENT == 4)); then
+    if (( $words[(I)(count)] )); then
+    _values -w 'news' 'new[Count only new news items]' 'all[Count all news items]' && return 0
+    fi
 
-		newslist=(${${${${${${${(M)${(f)"$(eselect --color=no news list)"}## *}// \**/}/  \[/}/\] ##/\[}/%/]}/ \[/ (}/\] /) })
+    newslist=(${${${${${${${(M)${(f)"$(eselect --color=no news list)"}## *}// \**/}/  \[/}/\] ##/\[}/%/]}/ \[/ (}/\] /) })
 
-		if (( $words[(I)(read)] )); then
-			newslist+=( "new[Read unread news items (default)]" "all[Read all news items]" "--mbox[Output in mbox format]" "--quiet[Suppress output, only change status]" "--raw[Output in raw format]" )
-		fi;
+    if (( $words[(I)(read)] )); then
+      newslist+=( "new[Read unread news items (default)]" "all[Read all news items]" "--mbox[Output in mbox format]" "--quiet[Suppress output, only change status]" "--raw[Output in raw format]" )
+    fi;
 
-		if (( $words[(I)(unread)] )); then
-			newslist+=( "all[Unread all news items]" )
-		fi
+    if (( $words[(I)(unread)] )); then
+      newslist+=( "all[Unread all news items]" )
+    fi
 
-		_values -w 'news' $newslist[@] && return 0
-	fi
+    _values -w 'news' $newslist[@] && return 0
+  fi
 }
 
 _eselect () {
-	local globopts modnames modopts
+  local globopts modnames modopts
 
-	globopts=(
-		"--brief[Make output shorter]"
-		"--colour=no[Disable coloured output]"
-		"--color=no[Disable coloured output]"
-	)
-	modnames=(${${${(M)${(f)"$(eselect --brief --color=no modules list)"}## *}//   */}//  /})
+  globopts=(
+    "--brief[Make output shorter]"
+    "--colour=no[Disable coloured output]"
+    "--color=no[Disable coloured output]"
+  )
+  modnames=(${${${(M)${(f)"$(eselect --brief --color=no modules list)"}## *}//   */}//  /})
 
-	if ((CURRENT == 2)); then
-		_arguments -s \
-			"$globopts[@]" \
-			"*:portage:_values 'eselect modules' \$modnames[@]" && return 0
-	elif ((CURRENT == 3)); then
-		if [[ $words[2] == --colour=no || $words[2] == --color=no ]]; then
-			_arguments -s \
-				"*:portage:_values 'eselect modules' \$modnames[@]" && return 0
-		elif (( $modnames[(I)$words[2]] )); then
-			if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
-				_eselect_$words[2] "$@"
-			else
-				modopts=(${${${(M)${(f)"$(eselect --brief --color=no $words[2] usage)"}## *}//   */}//  /})
-				_arguments -s \
-					"*:portage:_values 'eselect $words[2] options' \$modopts[@]" && return 0
-			fi
-		fi
-	elif ((CURRENT >= 4)); then
-		if (( $words[(I)(--color=no|--colour=no)] )); then
-			if (( $modnames[(I)$words[3]] )); then
-				if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
-					_eselect_$words[3] "$@"
-				else
-					modopts=(${${${${(M)${(f)"$(eselect --brief --color=no $words[3] usage)"}## *}//   */}//  /}// *})
-					_arguments -s \
-						"*:portage:_values 'eselect $words[3] options' \$modopts[@]" && return 0
-				fi
-			fi
-		else
-			if (( $modnames[(I)$words[2]] )); then
-				(( $+functions[_eselect_$words[2]] )) && _eselect_$words[2] "$@"
-			fi
-		fi
-	fi
+  if ((CURRENT == 2)); then
+    _arguments -s \
+      "$globopts[@]" \
+      "*:portage:_values 'eselect modules' \$modnames[@]" && return 0
+  elif ((CURRENT == 3)); then
+    if [[ $words[2] == --colour=no || $words[2] == --color=no ]]; then
+      _arguments -s \
+        "*:portage:_values 'eselect modules' \$modnames[@]" && return 0
+    elif (( $modnames[(I)$words[2]] )); then
+      if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
+        _eselect_$words[2] "$@"
+      else
+        modopts=(${${${(M)${(f)"$(eselect --brief --color=no $words[2] usage)"}## *}//   */}//  /})
+        _arguments -s \
+          "*:portage:_values 'eselect $words[2] options' \$modopts[@]" && return 0
+      fi
+    fi
+  elif ((CURRENT >= 4)); then
+    if (( $words[(I)(--color=no|--colour=no)] )); then
+      if (( $modnames[(I)$words[3]] )); then
+        if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
+          _eselect_$words[3] "$@"
+        else
+          modopts=(${${${${(M)${(f)"$(eselect --brief --color=no $words[3] usage)"}## *}//   */}//  /}// *})
+          _arguments -s \
+            "*:portage:_values 'eselect $words[3] options' \$modopts[@]" && return 0
+        fi
+      fi
+    else
+      if (( $modnames[(I)$words[2]] )); then
+        (( $+functions[_eselect_$words[2]] )) && _eselect_$words[2] "$@"
+      fi
+    fi
+  fi
 }
 
 _eselect "$@"
+
+# vim: set et sw=2 sts=2 ts=2 ft=zsh:

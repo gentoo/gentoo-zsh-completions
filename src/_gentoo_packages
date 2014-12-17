@@ -6,194 +6,193 @@ setopt extendedglob bareglobqual
 # inspired by _deb_packages
 #Usage: _gentoo_packages installed|available|installed_versions|available_versions|binary|category|useflag
 
-
 _portdir() {
-    local mainreponame mainrepopath overlayname overlaypath
+  local mainreponame mainrepopath overlayname overlaypath
 
-    if [[ -e /usr/share/portage/config/repos.conf ]]; then
-        if [[ ${1} == "-o" ]]; then
-            for overlayname in $(_parsereposconf -l); do
-                overlaypath+=($(_parsereposconf ${overlayname} location))
-            done
+  if [[ -e /usr/share/portage/config/repos.conf ]]; then
+    if [[ ${1} == "-o" ]]; then
+      for overlayname in $(_parsereposconf -l); do
+        overlaypath+=($(_parsereposconf ${overlayname} location))
+      done
 
-            source /etc/make.conf 2>/dev/null
-            source /etc/portage/make.conf 2>/dev/null
+      source /etc/make.conf 2>/dev/null
+      source /etc/portage/make.conf 2>/dev/null
 
-            overlaypath+=(${(@)PORTDIR_OVERLAY})
+      overlaypath+=(${(@)PORTDIR_OVERLAY})
 
-            echo "${(@u)overlaypath}"
-        else
-            mainreponame=$(_parsereposconf DEFAULT main-repo)
-            mainrepopath=$(_parsereposconf ${mainreponame} location)
-
-            echo "${mainrepopath}"
-        fi
+      echo "${(@u)overlaypath}"
     else
-        source /usr/share/portage/config/make.globals 2>/dev/null
-        source /etc/make.conf 2>/dev/null
-        source /etc/portage/make.conf 2>/dev/null
+      mainreponame=$(_parsereposconf DEFAULT main-repo)
+      mainrepopath=$(_parsereposconf ${mainreponame} location)
 
-        if [[ ${1} == "-o" ]]; then
-            echo "${(@u)PORTDIR_OVERLAY}"
-        else
-            echo "${PORTDIR}"
-        fi
+      echo "${mainrepopath}"
     fi
+  else
+    source /usr/share/portage/config/make.globals 2>/dev/null
+    source /etc/make.conf 2>/dev/null
+    source /etc/portage/make.conf 2>/dev/null
+
+    if [[ ${1} == "-o" ]]; then
+      echo "${(@u)PORTDIR_OVERLAY}"
+    else
+      echo "${PORTDIR}"
+    fi
+  fi
 }
 
 _parsereposconf() {
-    local v f insection section arr
+  local v f insection section arr
 
-    for f in /usr/share/portage/config/repos.conf \
-        /etc/portage/repos.conf \
-        /etc/portage/repos.conf/*.conf; do
+  for f in /usr/share/portage/config/repos.conf \
+           /etc/portage/repos.conf \
+           /etc/portage/repos.conf/*.conf; do
 
-        [[ -f ${f} ]] || continue
-        insection=0
-        declare -A arr
-        IFS='= '
+    [[ -f ${f} ]] || continue
+    insection=0
+    declare -A arr
+    IFS='= '
 
-        while read -r name value; do
-            [[ -z ${name} || ${name} == '#'* ]] && continue
+    while read -r name value; do
+      [[ -z ${name} || ${name} == '#'* ]] && continue
 
-            if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-                value=${name//(\]|\[)}
-                name="section"
-            fi
-            arr[${name}]=${value}
+      if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+        value=${name//(\]|\[)}
+        name="section"
+      fi
+      arr[${name}]=${value}
 
-            if [[ ${insection} == 1 && ${name} == "section" ]]; then
-                break
-            elif [[ ${name} == "section" ]]; then
-                [[ ${value} == ${1} ]] && insection=1
-                secname+=(${value})
-            elif [[ ${insection} == 1 ]]; then
-                if [[ ${name} == ${2} ]]; then
-                    v=${value}
-                fi
-            fi
-            continue
-        done < ${f}
-    done
+      if [[ ${insection} == 1 && ${name} == "section" ]]; then
+        break
+      elif [[ ${name} == "section" ]]; then
+        [[ ${value} == ${1} ]] && insection=1
+        secname+=(${value})
+      elif [[ ${insection} == 1 ]]; then
+        if [[ ${name} == ${2} ]]; then
+          v=${value}
+        fi
+      fi
+      continue
+    done < ${f}
+  done
 
-    if [[ ${1} == "-l" ]]; then
-        echo "${(@)secname}"
-    else
-        echo "${v}"
-    fi
+  if [[ ${1} == "-l" ]]; then
+    echo "${(@)secname}"
+  else
+    echo "${v}"
+  fi
 }
 
 _parsesetsconf() {
-    [[ -d ${1} ]] || continue
+  [[ -d ${1} ]] || continue
 
-    local v f places sections setsconf insection section arr
+  local v f places sections setsconf insection section arr
 
-    if [[ -d ${1}/sets ]]; then
-        setsconf=(${1}/sets/*.conf(N))
-       [[ (($#setsconf > 0)) ]] && places=(${setsconf})
-    elif [[ -f ${1}/sets.conf ]]; then
-        places=(${1}/sets.conf)
-    fi
+  if [[ -d ${1}/sets ]]; then
+    setsconf=(${1}/sets/*.conf(N))
+     [[ (($#setsconf > 0)) ]] && places=(${setsconf})
+  elif [[ -f ${1}/sets.conf ]]; then
+    places=(${1}/sets.conf)
+  fi
 
-    for f in ${(@)places}; do
-        if [[ -r ${f} ]]; then
-            insection=0
-            declare -A arr
-            IFS='= '
-            while read -r name value; do
-                [[ -z ${name} || ${name} == '#'* ]] && continue
+  for f in ${(@)places}; do
+    if [[ -r ${f} ]]; then
+      insection=0
+      declare -A arr
+      IFS='= '
+      while read -r name value; do
+        [[ -z ${name} || ${name} == '#'* ]] && continue
 
-                if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-                    value=${name//(\]|\[)}
-                    name="section"
-                fi
-                arr[${name}]=${value}
-
-                if [[ ${insection} == 1 && ${name} == "section" ]]; then
-                    [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
-                    insection=0
-                elif [[ ${name} == "section" ]]; then
-                    [[ ${value} =~ "${1:t} sets" ]] && insection=1
-                    [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
-                elif [[ ${insection} == 1 ]]; then
-                    [[ ${2} == "sets" ]] && continue
-                    if [[ ${name} == "directory" ]]; then
-                        v=${value}
-                    fi
-                fi
-                continue
-            done < ${f}
+        if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+          value=${name//(\]|\[)}
+          name="section"
         fi
-    done
+        arr[${name}]=${value}
 
-    if [[ ${2} == "sets" ]]; then
-        [[ ((${#sections} > 0)) ]] && echo ${(@)sections}
-    else
-        [[ ((${#v} > 0)) ]] && echo ${v:t}
+        if [[ ${insection} == 1 && ${name} == "section" ]]; then
+          [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+          insection=0
+        elif [[ ${name} == "section" ]]; then
+          [[ ${value} =~ "${1:t} sets" ]] && insection=1
+          [[ ${2} == "sets" ]] && [[ ! ${value} =~ "sets" ]] && sections+=(${value})
+        elif [[ ${insection} == 1 ]]; then
+          [[ ${2} == "sets" ]] && continue
+          if [[ ${name} == "directory" ]]; then
+            v=${value}
+          fi
+        fi
+        continue
+      done < ${f}
     fi
+  done
+
+  if [[ ${2} == "sets" ]]; then
+    [[ ((${#sections} > 0)) ]] && echo ${(@)sections}
+  else
+    [[ ((${#v} > 0)) ]] && echo ${v:t}
+  fi
 }
 
 _gentoo_packages_update_installed_sets() {
-    local sets
-    sets=($(</var/lib/portage/world_sets))
-    if [[ ((${#sets} > 0)) ]]; then
-         _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^sets}"
-    fi
+  local sets
+  sets=($(</var/lib/portage/world_sets))
+  if [[ ((${#sets} > 0)) ]]; then
+     _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^sets}"
+  fi
 }
 
 _gentoo_packages_update_available_sets() {
-    trees=($(_portdir -o) /etc/portage /usr/share/portage/config)
-    for PORTDIR in ${(@)trees}; do
-        if [[ -d ${PORTDIR} ]]; then
-            setsdir="$(_parsesetsconf ${PORTDIR})"
-            [[ ! -z "${setsdir}" ]] && setspath="${PORTDIR}/${setsdir}" || setspath="${PORTDIR}/sets"
-            if [[ -d "${setspath}" ]]; then
-                setsfiles=(${setspath}/*~*.conf(N))
-                for set in ${setsfiles[@]}; do
-                    sets+=(${set}(:t))
-                done
-                sets+=($(_parsesetsconf ${PORTDIR} sets))
-            fi
-        fi
-    done
-    if [[ ((${#sets} > 0)) ]]; then
-         _wanted available_sets expl 'available set' compadd "$@" "@${(o@)^sets}"
+  trees=($(_portdir -o) /etc/portage /usr/share/portage/config)
+  for PORTDIR in ${(@)trees}; do
+    if [[ -d ${PORTDIR} ]]; then
+      setsdir="$(_parsesetsconf ${PORTDIR})"
+      [[ ! -z "${setsdir}" ]] && setspath="${PORTDIR}/${setsdir}" || setspath="${PORTDIR}/sets"
+      if [[ -d "${setspath}" ]]; then
+        setsfiles=(${setspath}/*~*.conf(N))
+        for set in ${setsfiles[@]}; do
+          sets+=(${set}(:t))
+        done
+        sets+=($(_parsesetsconf ${PORTDIR} sets))
+      fi
     fi
+  done
+  if [[ ((${#sets} > 0)) ]]; then
+     _wanted available_sets expl 'available set' compadd "$@" "@${(o@)^sets}"
+  fi
 }
 
 # Completion function to show useflags.
 _gentoo_packages_update_useflag(){
-    local flags trees
+  local flags trees
 
-    flags=()
-    trees=($(_portdir) $(_portdir -o))
+  flags=()
+  trees=($(_portdir) $(_portdir -o))
 
-    for PORTDIR in ${trees[@]}; do
-       [[ -r ${PORTDIR}/profiles/use.desc ]] &&
-        flags+=(${${(M)${(f)"$(<$PORTDIR/profiles/use.desc)"}:#* - *}%% - *})
-       [[ -r ${PORTDIR}/profiles/use.local.desc ]] &&
-        flags+=(${${${(M)${(f)"$(<$PORTDIR/profiles/use.local.desc)"}#* - *}%% - *}#*:})
-    done
+  for PORTDIR in ${trees[@]}; do
+     [[ -r ${PORTDIR}/profiles/use.desc ]] &&
+    flags+=(${${(M)${(f)"$(<$PORTDIR/profiles/use.desc)"}:#* - *}%% - *})
+     [[ -r ${PORTDIR}/profiles/use.local.desc ]] &&
+    flags+=(${${${(M)${(f)"$(<$PORTDIR/profiles/use.local.desc)"}#* - *}%% - *}#*:})
+  done
 
-    compadd $flags
+  compadd $flags
 }
 
 _gentoo_packages_update_active_useflag(){
-    local flags USE
-    var=USE
-    [[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
-      local $var="`. /etc/portage/make.conf 2>/dev/null; echo ${(P)var}`"
-    [[ -z ${(P)var} && -r /etc/make.conf ]] &&
-      local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
-    flags=(${${${=USE}%-*}%\\*})
-    compadd $flags
+  local flags USE
+  var=USE
+  [[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
+    local $var="`. /etc/portage/make.conf 2>/dev/null; echo ${(P)var}`"
+  [[ -z ${(P)var} && -r /etc/make.conf ]] &&
+    local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
+  flags=(${${${=USE}%-*}%\\*})
+  compadd $flags
 }
 _gentoo_packages_update_category(){
-    local trees category
+  local trees category
 
-    trees=($(_portdir) $(_portdir -o))
-    category=( $trees/*-*(/:t) )
-    _wanted cat_packages expl 'category' compadd "$@" $category
+  trees=($(_portdir) $(_portdir -o))
+  category=( $trees/*-*(/:t) )
+  _wanted cat_packages expl 'category' compadd "$@" $category
 }
 
 _gentoo_packages_update_installed(){
@@ -209,101 +208,102 @@ _gentoo_packages_update_installed(){
 }
 
 _gentoo_packages_update_installed_versions(){
-    local installed_list installed_portage expl
+  local installed_list installed_portage expl
 
-    installed_portage=(/var/db/pkg/*-*/*)
-    _wanted packages expl 'package' compadd "$@" ${installed_portage:t}
+  installed_portage=(/var/db/pkg/*-*/*)
+  _wanted packages expl 'package' compadd "$@" ${installed_portage:t}
 
-    installed_list=(${installed_portage##*/pkg/})
-    _wanted cat_packages expl 'category/package' _multi_parts "$@" / installed_list
+  installed_list=(${installed_portage##*/pkg/})
+  _wanted cat_packages expl 'category/package' _multi_parts "$@" / installed_list
 }
 
 _gentoo_packages_update_available_pkgnames_only(){
-    local trees packages
+  local trees packages
 
-    trees=($(_portdir) $(_portdir -o))
+  trees=($(_portdir) $(_portdir -o))
 
-    packages=($trees/*-*/*(:t))
-    _wanted packages expl 'package' compadd - "${(@)packages}"
+  packages=($trees/*-*/*(:t))
+  _wanted packages expl 'package' compadd - "${(@)packages}"
 }
 
 _gentoo_packages_update_available(){
-    local trees category packages pkg expl
+  local trees category packages pkg expl
 
-    trees=($(_portdir) $(_portdir -o))
-    category=($trees/*-*(/:t))
+  trees=($(_portdir) $(_portdir -o))
+  category=($trees/*-*(/:t))
 
-    packages=($trees/*-*/*(:t))
-    _wanted packages expl 'package' compadd - "${(@)packages}"
+  packages=($trees/*-*/*(:t))
+  _wanted packages expl 'package' compadd - "${(@)packages}"
 
-    # Complete cat/pkg. _multi_parts is much to slow for such a large task,
-    # _sep_parts removes the dash from gnome-<tab>, and _path_files wants to
-    # complete cat/pkg/files (if "files" is ignored with -F, miscfiles, etc...
-    # don't get completed).
-    if [[ $PREFIX != */* ]] ; then
-        _wanted cat_packages expl 'category/package' compadd -S '/' $category
-    else
-        compset -P '*/'
-        pkg=($trees/$IPREFIX/*(:t))
-        _wanted cat_packages expl 'category/package' compadd $pkg
-    fi
+  # Complete cat/pkg. _multi_parts is much to slow for such a large task,
+  # _sep_parts removes the dash from gnome-<tab>, and _path_files wants to
+  # complete cat/pkg/files (if "files" is ignored with -F, miscfiles, etc...
+  # don't get completed).
+  if [[ $PREFIX != */* ]]; then
+    _wanted cat_packages expl 'category/package' compadd -S '/' $category
+  else
+    compset -P '*/'
+    pkg=($trees/$IPREFIX/*(:t))
+    _wanted cat_packages expl 'category/package' compadd $pkg
+  fi
 }
 
 _gentoo_packages_update_available_versions(){
-    local var overlay_ebuilds portage_ebuilds expl trees category
+  local var overlay_ebuilds portage_ebuilds expl trees category
 
-    PORTDIR=$(_portdir)
-    PORTDIR_OVERLAY=$(_portdir -o)
+  PORTDIR=$(_portdir)
+  PORTDIR_OVERLAY=$(_portdir -o)
 
-    trees=($PORTDIR $=PORTDIR_OVERLAY)
-    category=($trees/*-*(/:t))
-    typeset -U category
+  trees=($PORTDIR $=PORTDIR_OVERLAY)
+  category=($trees/*-*(/:t))
+  typeset -U category
 
-    if [[ $#PREFIX -ge 1 && -z $words[(r)(--inject|-i)] ]] ; then
-        overlay_ebuilds=($=PORTDIR_OVERLAY/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
-        portage_ebuilds=($PORTDIR/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
-        _wanted packages expl 'package' compadd $portage_ebuilds $overlay_ebuilds
-    fi
-    pkg=( $trees/${PREFIX%%/*}/*/*.ebuild(:t:r) )
-    _wanted cat_packages expl 'category/package' _sep_parts category / pkg
+  if [[ $#PREFIX -ge 1 && -z $words[(r)(--inject|-i)] ]]; then
+    overlay_ebuilds=($=PORTDIR_OVERLAY/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
+    portage_ebuilds=($PORTDIR/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
+    _wanted packages expl 'package' compadd $portage_ebuilds $overlay_ebuilds
+  fi
+  pkg=( $trees/${PREFIX%%/*}/*/*.ebuild(:t:r) )
+  _wanted cat_packages expl 'category/package' _sep_parts category / pkg
 }
 
 #Function to show tbz2 files available
 _gentoo_packages_update_binary() {
-    [[ -z $PKGDIR && -r /etc/portage/make.conf ]] &&
-        local PKGDIR="`. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR`"
-    [[ -z $PKGDIR && -r /etc/make.conf ]] &&
-        local PKGDIR="`. /etc/make.conf 2>/dev/null; echo $PKGDIR`"
-    [[ -z $PKGDIR && -r /usr/share/portage/config/make.globals ]] &&
-        local PKGDIR="`. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR`"
+  [[ -z $PKGDIR && -r /etc/portage/make.conf ]] &&
+    local PKGDIR="`. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR`"
+  [[ -z $PKGDIR && -r /etc/make.conf ]] &&
+    local PKGDIR="`. /etc/make.conf 2>/dev/null; echo $PKGDIR`"
+  [[ -z $PKGDIR && -r /usr/share/portage/config/make.globals ]] &&
+    local PKGDIR="`. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR`"
 
-    # this doesn't take care of ${PORTAGE_BINHOST}. If Gentoo official
-    # binary mirror will be available we should rewrite it accordingly.
-    _path_files -g \*.tbz2 -W "$PKGDIR/All"
+  # this doesn't take care of ${PORTAGE_BINHOST}. If Gentoo official
+  # binary mirror will be available we should rewrite it accordingly.
+  _path_files -g \*.tbz2 -W "$PKGDIR/All"
 }
 
 _gentoo_packages () {
-    local command="$argv[$#]" expl cachevar pkgset update_policy
-    zstyle -s ":completion:*:*:$service:*" cache-policy update_policy
-    if [[ -z "$update_policy" ]]; then
-        zstyle ":completion:*:*:$service:*" cache-policy _gentoo_cache_policy
-    fi
-    [[ "$command" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
-        _message "unknown command: $command"
-        return
-    }
-    [[ "$pkgset" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
-        pkgset="$command"
-    }
-    expl=("${(@)argv[1,-2]}")
-    _gentoo_packages_update_$pkgset
+  local command="$argv[$#]" expl cachevar pkgset update_policy
+  zstyle -s ":completion:*:*:$service:*" cache-policy update_policy
+  if [[ -z "$update_policy" ]]; then
+    zstyle ":completion:*:*:$service:*" cache-policy _gentoo_cache_policy
+  fi
+  [[ "$command" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
+    _message "unknown command: $command"
+    return
+  }
+  [[ "$pkgset" == (installed(_versions|_sets|)|available(_versions|_sets|_pkgnames_only|)|binary|category|(active_|)useflag) ]] || {
+    pkgset="$command"
+  }
+  expl=("${(@)argv[1,-2]}")
+  _gentoo_packages_update_$pkgset
 }
 
 _gentoo_cache_policy () {
   # rebuild if cache is more than a week old
-    oldp=( "$1"(mw+1) )
-      (( $#oldp )) && return 0
+  oldp=( "$1"(mw+1) )
+    (( $#oldp )) && return 0
 }
 
-
 _gentoo_packages "$@"
+
+# vim: set et sw=2 sts=2 ts=2 ft=zsh:
