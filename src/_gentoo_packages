@@ -181,9 +181,9 @@ _gentoo_packages_update_active_useflag(){
   local flags USE
   var=USE
   [[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
-    local $var="`. /etc/portage/make.conf 2>/dev/null; echo ${(P)var}`"
+    local $var="$(. /etc/portage/make.conf 2>/dev/null; echo ${(P)var})"
   [[ -z ${(P)var} && -r /etc/make.conf ]] &&
-    local $var="`. /etc/make.conf 2>/dev/null; echo ${(P)var}`"
+    local $var="$(. /etc/make.conf 2>/dev/null; echo ${(P)var})"
   flags=(${${${=USE}%-*}%\\*})
   compadd $flags
 }
@@ -270,11 +270,11 @@ _gentoo_packages_update_available_versions(){
 #Function to show tbz2 files available
 _gentoo_packages_update_binary() {
   [[ -z $PKGDIR && -r /etc/portage/make.conf ]] &&
-    local PKGDIR="`. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR`"
+    local PKGDIR="$(. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR)"
   [[ -z $PKGDIR && -r /etc/make.conf ]] &&
-    local PKGDIR="`. /etc/make.conf 2>/dev/null; echo $PKGDIR`"
+    local PKGDIR="$(. /etc/make.conf 2>/dev/null; echo $PKGDIR)"
   [[ -z $PKGDIR && -r /usr/share/portage/config/make.globals ]] &&
-    local PKGDIR="`. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR`"
+    local PKGDIR="$(. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR)"
 
   # this doesn't take care of ${PORTAGE_BINHOST}. If Gentoo official
   # binary mirror will be available we should rewrite it accordingly.
