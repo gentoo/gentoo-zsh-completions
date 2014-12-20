@@ -2,9 +2,7 @@
 
 # portage-utils-0.53
 
-local common_args PORTDIR
-
-PORTDIR="$(_gentoo_repos -m)"
+local common_args
 
 common_args=(
   '--root[Set the ROOT env var]:root directory:_files -/' \
@@ -25,7 +23,7 @@ case $service in
     local -a arches allarches
 
     show_archs(){
-      arches=(${(f)"$(<$PORTDIR/profiles/arch.list)"})
+      arches=(${(f)"$(<$(_gentoo_repos -m)/profiles/arch.list)"})
       for arch in $arches; do
         [[ $arch =~ '^[^#]' ]] && allarches+=( $arch )
       done

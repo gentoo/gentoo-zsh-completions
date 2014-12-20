@@ -65,17 +65,20 @@ _gentoo_packages_update_installed_sets() {
 }
 
 _gentoo_packages_update_available_sets() {
-  trees=($(_gentoo_repos -o) /etc/portage /usr/share/portage/config)
-  for PORTDIR in ${(@)trees}; do
-    if [[ -d ${PORTDIR} ]]; then
-      setsdir="$(_parsesetsconf ${PORTDIR})"
-      [[ ! -z "${setsdir}" ]] && setspath="${PORTDIR}/${setsdir}" || setspath="${PORTDIR}/sets"
-      if [[ -d "${setspath}" ]]; then
-        setsfiles=(${setspath}/*~*.conf(N))
-        for set in ${setsfiles[@]}; do
+  local dirs dir sets_dir set sets sets_path sets_files
+
+  dirs=($(_gentoo_repos -o) /etc/portage /usr/share/portage/config)
+
+  for dir in ${(@)dirs}; do
+    if [[ -d ${dir} ]]; then
+      sets_dir="$(_parsesetsconf ${dir})"
+      [[ ! -z "${sets_dir}" ]] && sets_path="${dir}/${sets_dir}" || sets_path="${dir}/sets"
+      if [[ -d "${sets_path}" ]]; then
+        sets_files=(${sets_path}/*~*.conf(N))
+        for set in ${sets_files[@]}; do
           sets+=(${set}(:t))
         done
-        sets+=($(_parsesetsconf ${PORTDIR} sets))
+        sets+=($(_parsesetsconf ${dir} sets))
       fi
     fi
   done
@@ -86,16 +89,13 @@ _gentoo_packages_update_available_sets() {
 
 # Completion function to show useflags.
 _gentoo_packages_update_useflag(){
-  local flags trees
+  local flags repo
 
-  flags=()
-  trees=($(_gentoo_repos))
-
-  for PORTDIR in ${trees[@]}; do
-     [[ -r ${PORTDIR}/profiles/use.desc ]] &&
-    flags+=(${${(M)${(f)"$(<$PORTDIR/profiles/use.desc)"}:#* - *}%% - *})
-     [[ -r ${PORTDIR}/profiles/use.local.desc ]] &&
-    flags+=(${${${(M)${(f)"$(<$PORTDIR/profiles/use.local.desc)"}#* - *}%% - *}#*:})
+  for repo in $(_gentoo_repos); do
+    [[ -r ${repo}/profiles/use.desc ]] &&
+      flags+=(${${(M)${(f)"$(<${repo}/profiles/use.desc)"}:#* - *}%% - *})
+    [[ -r ${repo}/profiles/use.local.desc ]] &&
+      flags+=(${${${(M)${(f)"$(<${repo}/profiles/use.local.desc)"}#* - *}%% - *}#*:})
   done
 
   compadd $flags
@@ -111,16 +111,17 @@ _gentoo_packages_update_active_useflag(){
   flags=(${${${=USE}%-*}%\\*})
   compadd $flags
 }
-_gentoo_packages_update_category(){
-  local trees category
 
-  trees=($(_gentoo_repos))
-  category=( $trees/*-*(/:t) )
+_gentoo_packages_update_category(){
+  local repos category
+
+  repos=($(_gentoo_repos))
+  category=( $repos/*-*(/:t) )
   _wanted cat_packages expl 'category' compadd "$@" $category
 }
 
 _gentoo_packages_update_installed(){
-   local installed_dir installed_portage installed_list expl
+   local installed_dir installed_portage installed_pkgname installed_list
    installed_dir="/var/db/pkg"
    installed_portage=($installed_dir/*-*/*)
 
@@ -132,7 +133,7 @@ _gentoo_packages_update_installed(){
 }
 
 _gentoo_packages_update_installed_versions(){
-  local installed_list installed_portage expl
+  local installed_list installed_portage
 
   installed_portage=(/var/db/pkg/*-*/*)
   _wanted packages expl 'package' compadd "$@" ${installed_portage:t}
@@ -142,21 +143,21 @@ _gentoo_packages_update_installed_versions(){
 }
 
 _gentoo_packages_update_available_pkgnames_only(){
-  local trees packages
+  local repos packages
 
-  trees=($(_gentoo_repos))
+  repos=($(_gentoo_repos))
 
-  packages=($trees/*-*/*(:t))
+  packages=($repos/*-*/*(:t))
   _wanted packages expl 'package' compadd - "${(@)packages}"
 }
 
 _gentoo_packages_update_available(){
-  local trees category packages pkg expl
+  local repos category packages pkg expl
 
-  trees=($(_gentoo_repos))
-  category=($trees/*-*(/:t))
+  repos=($(_gentoo_repos))
+  category=($repos/*-*(/:t))
 
-  packages=($trees/*-*/*(:t))
+  packages=($repos/*-*/*(:t))
   _wanted packages expl 'package' compadd - "${(@)packages}"
 
   # Complete cat/pkg. _multi_parts is much to slow for such a large task,
@@ -167,38 +168,40 @@ _gentoo_packages_update_available(){
     _wanted cat_packages expl 'category/package' compadd -S '/' $category
   else
     compset -P '*/'
-    pkg=($trees/$IPREFIX/*(:t))
+    pkg=($repos/$IPREFIX/*(:t))
     _wanted cat_packages expl 'category/package' compadd $pkg
   fi
 }
 
 _gentoo_packages_update_available_versions(){
-  local var overlay_ebuilds portage_ebuilds expl trees category
+  local main_repo overlays overlay_ebuilds gentoo_ebuilds repos category pkg
 
-  PORTDIR=$(_gentoo_repos -m)
-  PORTDIR_OVERLAY=$(_gentoo_repos -o)
+  main_repo=$(_gentoo_repos -m)
+  overlays=$(_gentoo_repos -o)
 
-  trees=($PORTDIR $=PORTDIR_OVERLAY)
-  category=($trees/*-*(/:t))
+  repos=($main_repo $=overlays)
+  category=($repos/*-*(/:t))
   typeset -U category
 
   if [[ $#PREFIX -ge 1 && -z $words[(r)(--inject|-i)] ]]; then
-    overlay_ebuilds=($=PORTDIR_OVERLAY/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
-    portage_ebuilds=($PORTDIR/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
-    _wanted packages expl 'package' compadd $portage_ebuilds $overlay_ebuilds
+    overlay_ebuilds=($=overlays/*-*/${PREFIX%%-[0-9]#*}*/*.ebuild(:t:r) )
+    gentoo_ebuilds=($main_repo/metadata/cache/*-*/${PREFIX%%-[0-9]#*}*(:t))
+    _wanted packages expl 'package' compadd $gentoo_ebuilds $overlay_ebuilds
   fi
-  pkg=( $trees/${PREFIX%%/*}/*/*.ebuild(:t:r) )
+  pkg=( $repos/${PREFIX%%/*}/*/*.ebuild(:t:r) )
   _wanted cat_packages expl 'category/package' _sep_parts category / pkg
 }
 
 #Function to show tbz2 files available
 _gentoo_packages_update_binary() {
+  local PKGDIR
+
   [[ -z $PKGDIR && -r /etc/portage/make.conf ]] &&
-    local PKGDIR="$(. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR)"
+    PKGDIR="$(. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR)"
   [[ -z $PKGDIR && -r /etc/make.conf ]] &&
-    local PKGDIR="$(. /etc/make.conf 2>/dev/null; echo $PKGDIR)"
+    PKGDIR="$(. /etc/make.conf 2>/dev/null; echo $PKGDIR)"
   [[ -z $PKGDIR && -r /usr/share/portage/config/make.globals ]] &&
-    local PKGDIR="$(. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR)"
+    PKGDIR="$(. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR)"
 
   # this doesn't take care of ${PORTAGE_BINHOST}. If Gentoo official
   # binary mirror will be available we should rewrite it accordingly.
@@ -207,6 +210,7 @@ _gentoo_packages_update_binary() {
 
 _gentoo_packages () {
   local command="$argv[$#]" expl cachevar pkgset update_policy
+
   zstyle -s ":completion:*:*:$service:*" cache-policy update_policy
   if [[ -z "$update_policy" ]]; then
     zstyle ":completion:*:*:$service:*" cache-policy _gentoo_cache_policy
@@ -223,6 +227,8 @@ _gentoo_packages () {
 }
 
 _gentoo_cache_policy () {
+  local oldp
+
   # rebuild if cache is more than a week old
   oldp=( "$1"(mw+1) )
     (( $#oldp )) && return 0
