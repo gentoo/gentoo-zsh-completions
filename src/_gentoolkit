@@ -369,11 +369,7 @@ _revdep-rebuild () {
     '(-p --pretend)'{-p,--pretend}'[Do a trial run without actually emerging anything (also passed to emerge command)]' \
     '(-P --no-progress)'{-P,--no-progress}'[Turn off the progress meter]' \
     '(-q --quiet)'{-q,--quiet}'[Be less verbose (also passed to emerge command)]' \
-    '(-v --verbose)'{-v,--verbose}'[Be more verbose (also passed to emerge command)]' \
-    '(-u --no-util)'{-u,--no-util}'[<UTIL> Do not use features provided by UTIL]:file:_files'
-    # XXX: does someone really use -u|--no-util option?
-    # we can check packages installed (like portage-utils etc) to see
-    # which "UTIL" is avaiable.
+    '(-v --verbose)'{-v,--verbose}'[Be more verbose (also passed to emerge command)]'
 }
 
 case "$service" in
