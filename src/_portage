@@ -1,4 +1,4 @@
-#compdef emerge ebuild quickpkg emaint env-update etc-update portageq repoman tbz2tool
+#compdef emerge ebuild quickpkg emaint env-update etc-update portageq repoman
 
 _ebuild () {
   if (( CURRENT == 2 )); then
@@ -333,14 +333,6 @@ _repoman () {
   fi
 }
 
-_tbz2tool () {
-  if   (( CURRENT == 2 )); then
-    _values 'action' 'join' 'split'
-  elif (( CURRENT > 2 )) && (( CURRENT < 6 )); then
-    _arguments -s '*:file:_files'
-  fi
-}
-
 zparseopts -D -E -A Args -- -emerge
 if (( ${+Args[--emerge]} )); then
   _emerge "$@" && return 0
@@ -370,9 +362,6 @@ case "$service" in
     ;;
   repoman)
     _repoman "$@" && return 0
-    ;;
-  tbz2tool)
-    _tbz2tool "$@" && return 0
     ;;
 esac
 
