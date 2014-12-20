@@ -4,7 +4,7 @@
 
 local common_args PORTDIR
 
-PORTDIR="$(_gentoo_repos)"
+PORTDIR="$(_gentoo_repos -m)"
 
 common_args=(
   '--root[Set the ROOT env var]:root directory:_files -/' \

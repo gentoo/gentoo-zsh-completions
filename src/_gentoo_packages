@@ -89,7 +89,7 @@ _gentoo_packages_update_useflag(){
   local flags trees
 
   flags=()
-  trees=($(_gentoo_repos) $(_gentoo_repos -o))
+  trees=($(_gentoo_repos))
 
   for PORTDIR in ${trees[@]}; do
      [[ -r ${PORTDIR}/profiles/use.desc ]] &&
@@ -114,7 +114,7 @@ _gentoo_packages_update_active_useflag(){
 _gentoo_packages_update_category(){
   local trees category
 
-  trees=($(_gentoo_repos) $(_gentoo_repos -o))
+  trees=($(_gentoo_repos))
   category=( $trees/*-*(/:t) )
   _wanted cat_packages expl 'category' compadd "$@" $category
 }
@@ -144,7 +144,7 @@ _gentoo_packages_update_installed_versions(){
 _gentoo_packages_update_available_pkgnames_only(){
   local trees packages
 
-  trees=($(_gentoo_repos) $(_gentoo_repos -o))
+  trees=($(_gentoo_repos))
 
   packages=($trees/*-*/*(:t))
   _wanted packages expl 'package' compadd - "${(@)packages}"
@@ -153,7 +153,7 @@ _gentoo_packages_update_available_pkgnames_only(){
 _gentoo_packages_update_available(){
   local trees category packages pkg expl
 
-  trees=($(_gentoo_repos) $(_gentoo_repos -o))
+  trees=($(_gentoo_repos))
   category=($trees/*-*(/:t))
 
   packages=($trees/*-*/*(:t))
@@ -175,7 +175,7 @@ _gentoo_packages_update_available(){
 _gentoo_packages_update_available_versions(){
   local var overlay_ebuilds portage_ebuilds expl trees category
 
-  PORTDIR=$(_gentoo_repos)
+  PORTDIR=$(_gentoo_repos -m)
   PORTDIR_OVERLAY=$(_gentoo_repos -o)
 
   trees=($PORTDIR $=PORTDIR_OVERLAY)
