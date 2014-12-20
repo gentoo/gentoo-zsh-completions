@@ -2,85 +2,9 @@
 
 # portage-utils-0.53
 
-_portdir() {
-  local mainreponame mainrepopath overlayname overlaypath
-
-  if [[ -e /usr/share/portage/config/repos.conf ]]; then
-    if [[ ${1} == "-o" ]]; then
-      for overlayname in $(_parsereposconf -l); do
-          overlaypath+=($(_parsereposconf ${overlayname} location))
-      done
-
-      source /etc/make.conf 2>/dev/null
-      source /etc/portage/make.conf 2>/dev/null
-
-      overlaypath+=(${(@)PORTDIR_OVERLAY})
-
-      echo "${(@u)overlaypath}"
-    else
-      mainreponame=$(_parsereposconf DEFAULT main-repo)
-      mainrepopath=$(_parsereposconf ${mainreponame} location)
-
-      echo "${mainrepopath}"
-    fi
-  else
-    source /usr/share/portage/config/make.globals 2>/dev/null
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
-
-    if [[ ${1} == "-o" ]]; then
-      echo "${(@u)PORTDIR_OVERLAY}"
-    else
-      echo "${PORTDIR}"
-    fi
-  fi
-}
-
-_parsereposconf() {
-  local v f insection section arr
-
-  for f in /usr/share/portage/config/repos.conf \
-    /etc/portage/repos.conf \
-    /etc/portage/repos.conf/*.conf; do
-
-    [[ -f ${f} ]] || continue
-    insection=0
-    declare -A arr
-    IFS='= '
-
-    while read -r name value; do
-      [[ -z ${name} || ${name} == '#'* ]] && continue
-
-      if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-        value=${name//(\]|\[)}
-        name="section"
-      fi
-      arr[${name}]=${value}
-
-      if [[ ${insection} == 1 && ${name} == "section" ]]; then
-        break
-      elif [[ ${name} == "section" ]]; then
-        [[ ${value} == ${1} ]] && insection=1
-        secname+=(${value})
-      elif [[ ${insection} == 1 ]]; then
-        if [[ ${name} == ${2} ]]; then
-          v=${value}
-        fi
-      fi
-      continue
-    done < ${f}
-  done
-
-  if [[ ${1} == "-l" ]]; then
-    echo "${(@)secname}"
-  else
-    echo "${v}"
-  fi
-}
-
 local common_args PORTDIR
 
-PORTDIR="$(_portdir)"
+PORTDIR="$(_gentoo_repos)"
 
 common_args=(
   '--root[Set the ROOT env var]:root directory:_files -/' \

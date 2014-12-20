@@ -6,82 +6,6 @@ setopt extendedglob bareglobqual
 # inspired by _deb_packages
 #Usage: _gentoo_packages installed|available|installed_versions|available_versions|binary|category|useflag
 
-_portdir() {
-  local mainreponame mainrepopath overlayname overlaypath
-
-  if [[ -e /usr/share/portage/config/repos.conf ]]; then
-    if [[ ${1} == "-o" ]]; then
-      for overlayname in $(_parsereposconf -l); do
-        overlaypath+=($(_parsereposconf ${overlayname} location))
-      done
-
-      source /etc/make.conf 2>/dev/null
-      source /etc/portage/make.conf 2>/dev/null
-
-      overlaypath+=(${(@)PORTDIR_OVERLAY})
-
-      echo "${(@u)overlaypath}"
-    else
-      mainreponame=$(_parsereposconf DEFAULT main-repo)
-      mainrepopath=$(_parsereposconf ${mainreponame} location)
-
-      echo "${mainrepopath}"
-    fi
-  else
-    source /usr/share/portage/config/make.globals 2>/dev/null
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
-
-    if [[ ${1} == "-o" ]]; then
-      echo "${(@u)PORTDIR_OVERLAY}"
-    else
-      echo "${PORTDIR}"
-    fi
-  fi
-}
-
-_parsereposconf() {
-  local v f insection section arr
-
-  for f in /usr/share/portage/config/repos.conf \
-           /etc/portage/repos.conf \
-           /etc/portage/repos.conf/*.conf; do
-
-    [[ -f ${f} ]] || continue
-    insection=0
-    declare -A arr
-    IFS='= '
-
-    while read -r name value; do
-      [[ -z ${name} || ${name} == '#'* ]] && continue
-
-      if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-        value=${name//(\]|\[)}
-        name="section"
-      fi
-      arr[${name}]=${value}
-
-      if [[ ${insection} == 1 && ${name} == "section" ]]; then
-        break
-      elif [[ ${name} == "section" ]]; then
-        [[ ${value} == ${1} ]] && insection=1
-        secname+=(${value})
-      elif [[ ${insection} == 1 ]]; then
-        if [[ ${name} == ${2} ]]; then
-          v=${value}
-        fi
-      fi
-      continue
-    done < ${f}
-  done
-
-  if [[ ${1} == "-l" ]]; then
-    echo "${(@)secname}"
-  else
-    echo "${v}"
-  fi
-}
-
 _parsesetsconf() {
   [[ -d ${1} ]] || continue
 
@@ -141,7 +65,7 @@ _gentoo_packages_update_installed_sets() {
 }
 
 _gentoo_packages_update_available_sets() {
-  trees=($(_portdir -o) /etc/portage /usr/share/portage/config)
+  trees=($(_gentoo_repos -o) /etc/portage /usr/share/portage/config)
   for PORTDIR in ${(@)trees}; do
     if [[ -d ${PORTDIR} ]]; then
       setsdir="$(_parsesetsconf ${PORTDIR})"
@@ -165,7 +89,7 @@ _gentoo_packages_update_useflag(){
   local flags trees
 
   flags=()
-  trees=($(_portdir) $(_portdir -o))
+  trees=($(_gentoo_repos) $(_gentoo_repos -o))
 
   for PORTDIR in ${trees[@]}; do
      [[ -r ${PORTDIR}/profiles/use.desc ]] &&
@@ -190,7 +114,7 @@ _gentoo_packages_update_active_useflag(){
 _gentoo_packages_update_category(){
   local trees category
 
-  trees=($(_portdir) $(_portdir -o))
+  trees=($(_gentoo_repos) $(_gentoo_repos -o))
   category=( $trees/*-*(/:t) )
   _wanted cat_packages expl 'category' compadd "$@" $category
 }
@@ -220,7 +144,7 @@ _gentoo_packages_update_installed_versions(){
 _gentoo_packages_update_available_pkgnames_only(){
   local trees packages
 
-  trees=($(_portdir) $(_portdir -o))
+  trees=($(_gentoo_repos) $(_gentoo_repos -o))
 
   packages=($trees/*-*/*(:t))
   _wanted packages expl 'package' compadd - "${(@)packages}"
@@ -229,7 +153,7 @@ _gentoo_packages_update_available_pkgnames_only(){
 _gentoo_packages_update_available(){
   local trees category packages pkg expl
 
-  trees=($(_portdir) $(_portdir -o))
+  trees=($(_gentoo_repos) $(_gentoo_repos -o))
   category=($trees/*-*(/:t))
 
   packages=($trees/*-*/*(:t))
@@ -251,8 +175,8 @@ _gentoo_packages_update_available(){
 _gentoo_packages_update_available_versions(){
   local var overlay_ebuilds portage_ebuilds expl trees category
 
-  PORTDIR=$(_portdir)
-  PORTDIR_OVERLAY=$(_portdir -o)
+  PORTDIR=$(_gentoo_repos)
+  PORTDIR_OVERLAY=$(_gentoo_repos -o)
 
   trees=($PORTDIR $=PORTDIR_OVERLAY)
   category=($trees/*-*(/:t))
