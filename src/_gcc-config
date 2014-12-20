@@ -4,12 +4,12 @@
 local arguments
 
 arguments=(
-  '(- :)'{--nocolor,-C}'[disable colored output]'
+  {'(--nocolor)-C','(-C)--nocolor'}'[disable colored output]'
   '(- :)'{--use-old,-O}'[use the old profile if one was selected]'
-  '(- :)'{--force,-f}'[make sure all config files are regenerated]'
+  {'(--force)-f','(-f)--force'}'[make sure all config files are regenerated]'
   '(- :)'{--get-current-profile,-c}'[print current used gcc profile]'
   '(- :)'{--list-profiles,-l}'[print a list of available profiles]'
-  '(- :)'{--split-profile,-S}'[split profiles into their components]'
+  {'(--split-profile)-S','(-S)--split-profile'}'[split profiles into their components]'
   '(- :)'{--print-environ,-E}'[print environment of the given/current profile]:profiles:_gcc_profiles'
   '(- :)'{--get-bin-path,-B}'[print binary path of given/current profile]:profiles:_gcc_profiles'
   '(- :)'{--get-lib-path,-L}'[print library path of given/current profile]:profiles:_gcc_profiles'

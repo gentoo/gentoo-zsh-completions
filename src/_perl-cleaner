@@ -6,9 +6,9 @@ local arguments
 arguments=(
   '(- :)'{--help,-h}'[show help]'
   '(- :)'{--version,-V}'[show version]'
-  '(- :)'{--pretend,-p}"[pretend (don't do anything)]"
-  '(- :)'{--verbose,-v}'[increase verbosity (may be specified multiple times)]'
-  '(- :)'{--quiet,-q}'[decrease verbosity]'
+  {'(--pretend)-p','(-p)--pretend'}"[pretend (don't do anything)]"
+  '*'{-v,--verbose}'[increase verbosity (may be specified multiple times)]'
+  '*'{-q,--quiet}'[decrease verbosity]'
   "--modules[rebuild perl modules for old installs of perl]"
   "--allmodules[rebuild all perl modules]"
   "--libperl[rebuild anything linked against libperl]"

@@ -5,8 +5,8 @@ local arguments
 arguments=(
   '(- :)'{--get-current-profile,-c}'[print current profile]'
   '(- :)'{--list-profiles,-l}'[print a list of available profiles]'
-  '(- :)'{--uninstall,-u}'[remove all signs of specified target]'
-  '(- :)'{--debug,-d}'[execute with debug output]'
+  {'(--uninstall)-u','(-u)--uninstall'}'[remove all signs of specified target]'
+  {'(--debug)-d','(-d)--debug'}'[execute with debug output]'
   '(- :)'{--help,-h}'[show help]'
   '(- :):profiles:_binutils_profiles'
 )
