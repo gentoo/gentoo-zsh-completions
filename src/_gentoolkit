@@ -22,6 +22,7 @@ _packages () {
 
 _euse () {
   local state tmp start_args suboptions_args
+
   start_args=(
     {'(--help)-h','(-h)--help'}'[show help]'
     {'(--version)-v','(-v)--version'}'[show version]'
@@ -34,10 +35,12 @@ _euse () {
     {'(--prune)-P','(-P)--prune'}'[alias for --remove]'
     {'(--package)-p','(-p)--package'}'[used with -E, -D, and -R to apply to a specific package only]'
   )
+
   suboptions_args=(
     {'(--global)-g','(-g)--global'}'[show only global use flags]'
     {'(--local)-l','(-l)--local'}'[show only local use flags]'
   )
+
   if (( CURRENT == 2 )); then
     _arguments -s $start_args
   elif (( CURRENT == 3 )); then
@@ -236,10 +239,12 @@ _eclean_wrapper () {
     '(: -)'{-h,--help}'[show help]'
     '(: -)'{-V,--version}'[show version]'
   )
+
   dist_opts=(
     '(-s,--size-limit)'{-s,--size-limit}'[do not delete disfiles bigger than <size>]:size:_eclean_size'
     '(-f,--fetch-restricted)'{-f,--fetch-restricted}'[protect fetch-restricted files]'
   )
+
   # XXX: If you add options here make sure that it'll work.
   #       since there isn't any option *right* now, $pkg_opts
   #       is never used.
@@ -258,11 +263,9 @@ _eclean_wrapper () {
       # global_opts and packages|distfiles otherwhise.
       if (( $words[(I)(packages)] )); then
         # Currently no options so return 0
-        #_values "packages options" $pkg_opts &&
         return 0
       elif (( $words[(I)(distfiles)] )); then
-        _values "distfiles options" $dist_opts &&
-        return 0
+        _values "distfiles options" $dist_opts && return 0
       else
         _arguments -s $global_opts
         # complete packages|distfiles only if CURRENT-1 don't need an arg

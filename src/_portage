@@ -12,7 +12,6 @@
 # Still TODO:
 # xpak
 
-# Stuff for ebuild
 _ebuild () {
   if (( CURRENT == 2 )); then
     _files -g \*.ebuild
@@ -38,7 +37,6 @@ _ebuild () {
       'manifest[Updates the manifest file for the package.]' \
       'rpm[Builds a RedHat RPM package]'
   fi
-
 }
 
 _quickpkg () {
@@ -65,24 +63,30 @@ _quickpkg () {
   fi
 }
 
-# Stuff for emerge
-
 _emerge () {
-  local nopkg_opts all noask_opts bopts install_args common_args profiles
+  local noask_opts nopkg_opts bopts all common_args install_args profiles
 
-  noask_opts=(-p -a --pretend --ask --regen --info --search -s --searchdesc \
-    -S --version -V --help -h --metadata --check-news)
+  noask_opts=(
+    -p -a --pretend --ask --regen --info --search -s --searchdesc
+    -S --version -V --help -h --metadata --check-news
+  )
 
-  nopkg_opts=(--resume --skipfirst -c --clean -h --help --depclean --info \
-    --metadata -P --prune --regen -s --search -S --searchdesc --sync -C \
-    --unmerge -V --version -i --inject --list-sets --deselect --check-news)
+  nopkg_opts=(
+    --resume --skipfirst -c --clean -h --help --depclean --info
+    --metadata -P --prune --regen -s --search -S --searchdesc --sync -C
+    --unmerge -V --version -i --inject --list-sets --deselect --check-news
+  )
 
-  bopts=($nopkg_opts -b --buildpkg -B --buildpkgonly -G --getbinpkgonly -g \
-    --getbinpkg -k --usepkg -K --usepkgonly --fetch-all-uri -f -F --fetchonly)
+  bopts=(
+    $nopkg_opts -b --buildpkg -B --buildpkgonly -G --getbinpkgonly -g
+    --getbinpkg -k --usepkg -K --usepkgonly --fetch-all-uri -f -F --fetchonly
+  )
 
-  all=($bopts -l --changelog --columns --deep -D --emptytree -e --newuse \
-    --noconfmem --nodeps -O --noreplace -n --oneshot -1 -o --onlydeps --tree -t \
-    -u --update -U --upgradeonly --config)
+  all=(
+    $bopts -l --changelog --columns --deep -D --emptytree -e --newuse
+    --noconfmem --nodeps -O --noreplace -n --oneshot -1 -o --onlydeps --tree -t
+    -u --update -U --upgradeonly --config
+  )
 
   common_args=(
     "($noask_opts --sync)"{-p,--pretend}"[Simply display what would be done]"
@@ -102,6 +106,7 @@ _emerge () {
     "--moo[Have you mooed today?]"
     "(--jobs)--jobs[Number of packages to build simultaneously]:jobs:({1.."${#${$(</proc/cpuinfo)/^processor}}"})"
   )
+
   install_args=(
     "--deselect[Remove atom from world file]"
     "--alphabetical[Sort use/other flags output alphabetically despite of status]"
@@ -191,6 +196,7 @@ _emerge () {
     "(: $all[3,-1])--skipfirst[Removes the first package in the resume list]"
     "($all)--keep-going[Continue merge even if a package fails to build]"
   )
+
   profiles=(
     'world[All packages in the world profile]'
     'system[All packages in the system profile]'
