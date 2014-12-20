@@ -1,16 +1,4 @@
-#compdef emerge ebuild quickpkg emaint env-update portageq repoman tbz2tool
-
-# Already done:
-# emerge        (fully done)
-# ebuild        (fully done)
-# emaint        (fully done)
-# env-update    (fully done)
-# portageq      (fully done)
-# repoman       (fully done)
-# tbz2tool      (fully done)
-#
-# Still TODO:
-# xpak
+#compdef emerge ebuild quickpkg emaint env-update etc-update portageq repoman tbz2tool
 
 _ebuild () {
   if (( CURRENT == 2 )); then
@@ -255,6 +243,22 @@ _env-update () {
   _arguments -s '(: -)--no-ldconfig[Do not run ldconfig]'
 }
 
+_etc-update () {
+  _arguments -s \
+    {'(--debug)-d','(-d)--debug'}'[Enable shell debugging]' \
+    {'(--help)-h','(-h)--help'}'[Show help message and exit]' \
+    {'(--preen)-p','(-p)--preen'}'[Auto-merge trivial changes only and exit]' \
+    {'(--quiet)-q','(-q)--quiet'}'[Show only essential output]' \
+    {'(--verbose)-v','(-v)--verbose'}'[Show settings and such along the way]' \
+    {'(--version)-V','(-V)--version'}'[Show version and exit]' \
+    "--automode[automatically perform operation on all files]:mode:(( \
+      -3\:'auto-merge all files' \
+      -5\:'auto-merge all files without using \"mv -i\"' \
+      -7\:'discard all updates' \
+      -9\:'discard all updates without using \"rm -i\"' ))" \
+    '*:paths to scan:_files -/'
+}
+
 _portageq () {
   local action
 
@@ -357,6 +361,9 @@ case "$service" in
     ;;
   env-update)
     _env-update "$@" && return 0
+    ;;
+  etc-update)
+    _etc-update "$@" && return 0
     ;;
   portageq)
     _portageq "$@" && return 0
