@@ -1,0 +1,23 @@
+#compdef binutils-config
+
+local arguments
+
+arguments=(
+  '(- :)'{--get-current-profile,-c}'[print current profile]'
+  '(- :)'{--list-profiles,-l}'[print a list of available profiles]'
+  '(- :)'{--uninstall,-u}'[remove all signs of specified target]'
+  '(- :)'{--debug,-d}'[execute with debug output]'
+  '(- :)'{--help,-h}'[show help]'
+  '(- :):profiles:_binutils_profiles'
+)
+
+_binutils_profiles() {
+  local profiles
+  profiles=(${(f)"$(_call_program binutils-installed RC_NOCOLOR=yes binutils-config --list-profiles)"})
+  profiles=${${profiles/\[([^]]*)\]/}/\*}
+  _tags profiles && { compadd "$@" -k profiles || compadd "$@" ${(kv)=profiles} }
+}
+
+_arguments $arguments
+
+# vim: set et sw=2 ts=2 ft=zsh:
