@@ -41,16 +41,27 @@ _ebuild () {
 
 }
 
-# Stuff for quickpkg
-
 _quickpkg () {
+  local optional_args
+
+  optional_args=(
+    "(: -)"{-h,--help}'[show this help message and exit]'
+    "--umask[umask used during package creation (default is 0077)]:umask (octal)"
+    "--ignore-default-opts[do not use the QUICKPKG_DEFAULT_OPTS environment variable]"
+    "--include-config[include all files protected by CONFIG_PROTECT (as a security precaution, default is 'n')]:y or n:((y n))"
+    "--include-unmodified-config[include files protected by CONFIG_PROTECT that have not been modified since installation (as a security precaution, default is 'n')]:y or n:((y n))"
+  )
+
   if compset -P '(\\|)(>=|<=|<|>|=)'; then
-  _arguments -s \
-    '*:installed package:_gentoo_packages installed_versions'
+    _arguments -s \
+      "$optional_args[@]" \
+      '*:installed package:_gentoo_packages installed_versions'
   elif compset -P '(\\|)[/]'; then
     _path_files -W / -/
   else
-    _arguments '*:installed package:_gentoo_packages installed'
+    _arguments \
+      "$optional_args[@]" \
+      '*:installed package:_gentoo_packages installed'
   fi
 }
 
