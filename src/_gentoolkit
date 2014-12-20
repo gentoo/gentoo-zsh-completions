@@ -1,16 +1,5 @@
 #compdef equery euse eclean eclean-dist eclean-pkg epkginfo genpkgindex glsa-check revdep-rebuild
 
-# gentoolkit-0.2.4-rc3
-#
-# euse          (fully done)
-# equery        (fully done)
-# eclean*       (fully done)
-# epkginfo      (fully done)
-# genpkgindex   (fully done)
-# glsa-check    (fully done)
-# revdep-rebuild (partial)
-# eread         *nothing todo*
-
 # XXX: shouldn't this go to _gentoo_package?
 _packages () {
   if compset -P '(\\|)(>=|<=|<|>|=)'; then
@@ -301,9 +290,18 @@ _eclean_size () {
 }
 
 _epkginfo () {
-  if (( CURRENT == 2 )); then
-    _arguments -s '*:package:_gentoo_packages available'
-  fi
+  _arguments -s \
+    '(: -)'{-h,--help}'[Display help and exit]' \
+    {'(--description)-d','(-d)--description'}'[show an extended package description]' \
+    {'(--herd)-H','(-H)--herd'}'[show the herd(s) for the package]' \
+    {'(--keywords)-k','(-k)--keywords'}'[show keywords for all matching package versions]' \
+    {'(--license)-l','(-l)--license'}'[show licenses for the best maching version]' \
+    {'(--maintainer)-m','(-m)--maintainer'}'[show the maintainer(s) for the package]' \
+    {'(--stablreq)-S','(-S)--stablreq'}"[show STABLEREQ arches (cc's) for all matching package versions]" \
+    {'(--useflags)-u','(-u)--useflags'}'[show per-package USE flag descriptions]' \
+    {'(--upstream)-U','(-U)--upstream'}"[show package's upstream information]" \
+    {'(--xml)-x','(-x)--xml'}'[show the plain metadata.xml file]' \
+    '*:package:_gentoo_packages available'
 }
 
 _genpkgindex () {
