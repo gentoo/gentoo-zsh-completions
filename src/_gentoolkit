@@ -1,4 +1,4 @@
-#compdef equery euse eclean eclean-dist eclean-pkg epkginfo genpkgindex glsa-check revdep-rebuild
+#compdef equery euse eclean eclean-dist eclean-pkg epkginfo eshowkw genpkgindex glsa-check revdep-rebuild
 
 # XXX: shouldn't this go to _gentoo_package?
 _packages () {
@@ -304,6 +304,21 @@ _epkginfo () {
     '*:package:_gentoo_packages available'
 }
 
+_eshowkw () {
+  _arguments -s \
+    '(: -)'{-h,--help}'[Display help and exit]' \
+    '(: -)'{-v,--version}'[Show package version and exit]' \
+    {'(--arch)-a','(-a)--arch'}'[Display only specified arch(es)]:arch(es):_gentoo_arches' \
+    {'(--align)-A','(-A)--align'}'[Specify alignment for descriptions (default: bottom)]:alignment:((top bottom))' \
+    {'(--top-position)-T','(-T)--top-position'}'[Specify which fields we want to have in top listing (default: archlist)]:field:((archlist versionlist))' \
+    {'(--bold)-B','(-B)--bold'}'[Print out each other column in bold for easier visual separation]' \
+    {'(--color)-C','(-C)--color'}'[Force colored output]' \
+    {'(--overlays)-O','(-O)--overlays'}'[Include overlays in search]' \
+    {'(--prefix)-P','(-P)--prefix'}'[Display prefix keywords in output]' \
+    {'(--ignore-slot)-S','(-S)--ignore-slot'}'[Treat slots as irelevant during detection of redundant packages]' \
+    '*:package:_gentoo_packages available'
+}
+
 _genpkgindex () {
   _arguments -s \
     '(: -)'{-h,--help}'[Display help and exit]' \
@@ -384,6 +399,9 @@ case "$service" in
     ;;
   epkginfo)
     _epkginfo "$@" && return 0
+    ;;
+  eshowkw)
+    _eshowkw "$@" && return 0
     ;;
   genpkgindex)
     _genpkgindex "$@" && return 0
