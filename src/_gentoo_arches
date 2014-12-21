@@ -1,0 +1,11 @@
+#autoload
+
+local arches arch allarches
+
+arches=(${(f)"$(<$(_gentoo_repos -m)/profiles/arch.list)"})
+for arch in $arches; do
+  [[ $arch =~ '^[^#]' ]] && allarches+=( $arch )
+done
+_describe -t available-arches "arch" allarches
+
+# vim: ft=zsh sw=2 ts=2 et
