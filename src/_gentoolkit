@@ -308,7 +308,7 @@ _eshowkw () {
   _arguments -s \
     '(: -)'{-h,--help}'[Display help and exit]' \
     '(: -)'{-v,--version}'[Show package version and exit]' \
-    {'(--arch)-a','(-a)--arch'}'[Display only specified arch(es)]:arch(es):_gentoo_arches' \
+    {'(--arch)-a','(-a)--arch'}'[Display only specified arch(es)]:arch:_values -s , "arch" $(_gentoo_arches)' \
     {'(--align)-A','(-A)--align'}'[Specify alignment for descriptions (default: bottom)]:alignment:((top bottom))' \
     {'(--top-position)-T','(-T)--top-position'}'[Specify which fields we want to have in top listing (default: archlist)]:field:((archlist versionlist))' \
     {'(--bold)-B','(-B)--bold'}'[Print out each other column in bold for easier visual separation]' \

@@ -19,6 +19,9 @@ case $service in
       {'(--compare)-c','(-c)--compare'}'[Compare two atoms]'
     ;;
   qcache)
+    local arches
+    arches=( $(_gentoo_arches) )
+
     _arguments -s $common_args \
       {'(--matchpkg)-p','(-p)--matchpkg'}'[match pkgname]:package name:_gentoo_packages available_pkgnames_only' \
       {'(--matchcat)-c','(-c)--matchcat'}'[match catname]:category:_gentoo_packages category' \
@@ -27,8 +30,9 @@ case $service in
       {'(--testing)-t','(-t)--testing'}'[list packages that have ~arch versions, but no stable versions on a given arch]' \
       {'(--stats)-s','(-s)--stats'}'[display statistics about the portage tree]' \
       {'(--all)-a','(-a)--all'}'[list packages that have at least one version keyworded for on a given arch]' \
-      {'(--not)-n','(-n)--not'}"[list packages that aren't keyworded on a given arch]" \
-      '*:arch:_gentoo_arches'
+      {'(--not)-n','(-n)--not'}"[list packages that aren't keyworded on a given arch]"
+
+      _describe -t available-arches "arch" arches
     ;;
   qcheck)
     _arguments -s $common_args \
