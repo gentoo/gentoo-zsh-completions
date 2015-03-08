@@ -153,6 +153,7 @@ _gentoo_packages_update_available_pkgnames_only(){
 
 _gentoo_packages_update_available(){
   local repos category packages pkg expl
+  typeset -U repos
 
   repos=($(_gentoo_repos))
   category=($repos/*-*(/:t))
