@@ -59,6 +59,7 @@ _equery () {
 
   start_args=(
     {'(--nocolor)-C','(-C)--nocolor'}'[turns off colors]'
+    {'(--no-pipe)-N','(-N)--no-pipe'}'[turn off pipe detection]'
     {'(--quiet)-q','(-q)--quiet'}'[minimal output]'
     {'(--help)-h','(-h)--help'}'[show help]'
     {'(--version)-V','(-V)--version'}'[show version]'
