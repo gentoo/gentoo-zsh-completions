@@ -6,9 +6,12 @@
 #   _gentoo_repos -o -> returns the list of non-main repos
 
 _gentoo_repos() {
-  local main_repo main_repo_path overlay overlay_paths
+  local main_repo main_repo_path overlay overlay_paths result
 
-  if [[ -e /usr/share/portage/config/repos.conf ]]; then
+  overlay_paths=();
+  result=();
+
+  if [[ -e /usr/share/portage/config/repos.conf || -e /etc/portage/repos.conf ]]; then
     main_repo=$(_repos_conf DEFAULT main-repo)
     main_repo_path=$(_repos_conf ${main_repo} location)
 
@@ -30,16 +33,20 @@ _gentoo_repos() {
   fi
 
   if [[ $1 == "-m" ]]; then
-    echo "${main_repo_path}"
+    result+=(${main_repo_path})
   elif [[ $1 == "-o" ]]; then
-    echo "${(@u)overlay_paths}"
+    result+=(${(@)overlay_paths})
   else
-    echo "${main_repo_path} ${(@u)overlay_paths}"
+    result+=(${main_repo_path} ${(@)overlay_paths})
   fi
+
+  echo ${(u)result}
 }
 
 _repos_conf() {
-  local v file insection section arr
+  local v file insection section arr secname
+
+  secname=();
 
   for file in /usr/share/portage/config/repos.conf \
            /etc/portage/repos.conf \
@@ -74,7 +81,7 @@ _repos_conf() {
   done
 
   if [[ ${1} == "-l" ]]; then
-    echo "${(@)secname}"
+    echo "${(@u)secname}"
   else
     echo "${v}"
   fi
