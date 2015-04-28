@@ -128,7 +128,7 @@ _equery () {
                 '(-s --timestamp)'{-s,--timestamp}'[include timestamp in output]' \
                 '(-t --type)'{-t,--type}'[include file type in output]' \
                 '--tree[display results in a tree (turns off other options)]' \
-                '--filter=[filter output]:filter(s):_values -s , '' dir obj sym dev fifo path conf cmd doc man info' \
+                '--filter=[filter output]:filter(s):_values -s , "" dir obj sym dev fifo path conf cmd doc man info' \
                 ':installed pkgname:_packages installed' && ret=0
               ;;
             has|a)
