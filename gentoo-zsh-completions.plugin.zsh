@@ -1,1 +1,1 @@
-fpath+="$(dirname $0)/src"
+fpath+=("${${(%):-%N}:A:h}/src")
