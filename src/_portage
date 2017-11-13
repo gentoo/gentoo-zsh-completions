@@ -11,7 +11,10 @@ _ebuild () {
       'fetch[Fetch all necessary files]' \
       'digest[Creates a digest file for the package]' \
       'unpack[Extracts the sources to a subdirectory in the build directory]' \
+      'prepare[Prepares the extracted sources by running the src_prepare()]' \
+      'configure[Configures the extracted sources by running the src_configure()]' \
       'compile[Compiles the extracted sources by running the src_compile()]' \
+      'test[Runs package-specific test cases to verify that everything was built properly]' \
       'preinst[Run specific actions that need to be done before installation]' \
       'install[Installs the package to the temporary install directory]' \
       'postinst[Run specific actions that need to be done after installation]' \
