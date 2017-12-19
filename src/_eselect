@@ -13,7 +13,7 @@ _eselect_env () {
       "noldconfig[Do not alter the ld.so cache or configuration]" && return 0
   fi
   _values "env options" $common_values \
-    'update[Collect environment variables from all scripts in /etc/env.d/]' && return 0
+    'update[Collect environment variables from all scripts]' && return 0
 }
 
 _eselect_binutils () {
