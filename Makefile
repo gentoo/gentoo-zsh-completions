@@ -2,7 +2,7 @@
 DESTDIR =
 EPREFIX =
 
-completionsdir ?= ${EPREFIX}/usr/share/zsh/site
+completionsdir ?= ${EPREFIX}/usr/share/zsh/site-functions
 completions = $(wildcard src/_*)
 
 POSTINST_SED = sed -i -e "s|@GENTOO_PORTAGE_EPREFIX@|${EPREFIX}|g"
