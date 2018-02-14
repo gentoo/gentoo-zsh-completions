@@ -1,33 +1,51 @@
 #compdef emerge ebuild quickpkg emaint env-update etc-update portageq repoman
 
 _ebuild () {
-  if (( CURRENT == 2 )); then
-    _files -g \*.ebuild
-  elif (( CURRENT > 2 )); then
-    _values "ebuild command" \
-      'clean[Cleans the temporary build directory]' \
-      'help[Show help]' \
-      'setup[Run all package specific setup actions and exotic system checks.]' \
-      'fetch[Fetch all necessary files]' \
-      'digest[Creates a digest file for the package]' \
-      'unpack[Extracts the sources to a subdirectory in the build directory]' \
-      'prepare[Prepares the extracted sources by running the src_prepare()]' \
-      'configure[Configures the extracted sources by running the src_configure()]' \
-      'compile[Compiles the extracted sources by running the src_compile()]' \
-      'test[Runs package-specific test cases to verify that everything was built properly]' \
-      'preinst[Run specific actions that need to be done before installation]' \
-      'install[Installs the package to the temporary install directory]' \
-      'postinst[Run specific actions that need to be done after installation]' \
-      'qmerge[Installs the package de the filesystem]' \
-      'merge[perform the following actions: fetch, unpack, compile, install and qmerge.]' \
-      'unmerge[Remove the installed files of the packages]' \
-      'prerm[Run specific actions that need to be executed before unmerge]' \
-      'postrm[Run specific actions that need to be executed after unmerge]' \
-      'config[Run specific actions needed to be executed after the emerge process has completed.]' \
-      'package[This command is a lot like the merge command, but create a .tbz2 package]' \
-      'manifest[Updates the manifest file for the package.]' \
-      'rpm[Builds a RedHat RPM package]'
-  fi
+  local state
+  local expl=(-Vx)
+  local optional_args=(
+    '--skip-manifest[skip all manifest checks]'
+    '--debug[run bash with the -x option]'
+    '--color=[enable or disable  color  output]:yes/no:((y\:yes n\:no))'
+    '--ignore-default-opts[ignore $EBUILD_DEFAULT_OPTS]'
+    '--force[forces regeneration all associated distfiles if used with digest or or manifest command]'
+  )
+
+  _arguments -O expl -C $optional_args "1:ebuild file:_files -g \*.ebuild" "*:ebuild command:->ebuild_cmd"
+
+  case $state in
+    (ebuild_cmd)
+
+      local ebuild_cmds=(
+        'clean[Cleans the temporary build directory]'
+        'help[Show help]'
+        'setup[Run all package specific setup actions and exotic system checks]'
+        'fetch[Fetch all necessary files]'
+        'digest[Creates a digest file for the package]'
+        'unpack[Extracts the sources to a subdirectory in the build directory]'
+        'prepare[Prepares the extracted sources by running the src_prepare()]'
+        'configure[Configures the extracted sources by running the src_configure()]'
+        'compile[Compiles the extracted sources by running the src_compile()]'
+        'test[Runs package-specific test cases to verify that everything was built properly]'
+        'preinst[Run specific actions that need to be done before installation]'
+        'install[Installs the package to the temporary install directory]'
+        'postinst[Run specific actions that need to be done after installation]'
+        'qmerge[Installs the package de the filesystem]'
+        'merge[perform the following actions: fetch, unpack, compile, install and qmerge]'
+        'unmerge[Remove the installed files of the packages]'
+        'prerm[Run specific actions that need to be executed before unmerge]'
+        'postrm[Run specific actions that need to be executed after unmerge]'
+        'config[Run specific actions needed to be executed after the emerge process has completed]'
+        'package[This command is a lot like the merge command, but create a .tbz2 package]'
+        'manifest[Updates the manifest file for the package]'
+        'rpm[Builds a RedHat RPM package]'
+      )
+
+      local curcontext="ebuild_cmd"
+      zstyle -t ":completion:${curcontext}:values:values" sort || zstyle ":completion:${curcontext}:values:values" sort false
+      _values -w "ebuild command" "$ebuild_cmds[@]"
+      ;;
+  esac
 }
 
 _quickpkg () {
@@ -186,6 +204,8 @@ _emerge () {
     "(: $all[3,-1])--resume[Resumes the last merge operation]"
     "(: $all[3,-1])--skipfirst[Removes the first package in the resume list]"
     "($all)--keep-going[Continue merge even if a package fails to build]"
+    "--with-bdeps=[pull in build time dependencies  that  are  not  strictly  required]:yes/no:((y\:'yes' n\:'no'))"
+    "--with-test-deps=[pull in dependencies that are conditional  on  the \"testUSE flag]:yes/no:((y\:'yes' n\:'no'))"
   )
 
   profiles=(
@@ -235,11 +255,76 @@ _emerge () {
 }
 
 _emaint () {
-  _arguments -s \
+  local state
+  local chk_opt fix_opt pretend_opt clean_opt purge_opt log_extra_opt repo_opt
+  local sync_opt sync_extra_opt standalone_opt exclusive_cmd_opt repos
+  local allcmd logcmd synccmd mergecmd fixcmds
+  chk_opt=(-c --check)
+  fix_opt=(-f --fix)
+  pretend_opt=(-p --pretend)
+  clean_opt=(-C --clean)
+  purge_opt=(-P --purge)
+  log_extra_opt=(-t --time)
+  repo_opt=(-r --repo)
+  sync_opt=(-a --auto -A --allrepos)
+  sync_extra_opt=(--sync-submodule $repo_opt)
+
+  standalone_opt=(-h --help --version)
+  exclusive_cmd_opt=($chk_opt $fix_opt $sync_opt $purge_opt $pretend_opt $standalone_opt)
+  repos=$(_gentoo_repos_conf -l)
+
+  _arguments -C \
     "(: -)"{-h,--help}'[show help message and exit]' \
+    "($sync_extra_opt $log_extra_opt $exclusive_cmd_opt $clean_opt)"{-f,--fix}"[Fix any problems that may exist]" \
     "(: -)"--version"[show program's version number and exit]" \
-    '(-c --check -f --fix)'{-c,--check}"[Check for any problems that may exist]:emaint:((all\:'check all' world\:'check only world file'))" \
-    '(-c --check -f --fix)'{-f,--fix}"[Fix any problems that may exist]:emaint:((all\:'check all' world\:'check only world file'))"
+    "($sync_extra_opt $exclusive_cmd_opt)"{-c,--check}"[check for any problems that may exist]" \
+    "($fix_opt $purge_opt $sync_opt $sync_extra_opt $standalone_opt -t --time)"{-t,--time}"[(cleanlogs only)changes the minimum age NUM (in days) of the logs to be listed or deleted]" \
+    "($sync_extra_opt $exclusive_cmd_opt)"{-p,--pretend}"[output logs that would be deleted (cleanlogs only)]" \
+    "($fix_opt $sync_opt $sync_extra_opt $purge_opt)"{-C,--clean}"[cleans the logs from \$PORT_LOGDIR (cleanlogs only)]" \
+    "($log_extra_opt $sync_extra_opt $exclusive_cmd_opt $clean_opt)"{-P,--purge}"[removes the list of previously failed merges (merges only)]" \
+    "($repo_opt $log_extra_opt $exclusive_cmd_opt $clean_opt)"{-a,--auto}"[sync repositories which have their auto-sync setting set (sync module only)]" \
+    "($chk_opt $fix_opt $purge_opt $pretend_opt $log_extra_opt $clean_opt $standalone_opt)*"{-r,--repo}"=[Sync the specified repo]:gentoo repo:($repos)" \
+    "($repo_opt $log_extra_opt $exclusive_cmd_opt $clean_opt)"{-A,--allrepos}"[Sync all repos that have a sync-url defined (sync module only)]" \
+    "($chk_opt $fix_opt $purge_opt $pretend_opt $log_extra_opt $clean_opt $standalone_opt)*--sync-submodule=[restrict sync to the specified submodule (sync module only)]:portage submodule:(glsa news profiles)" \
+    "1:emaint commands:->emaint_cmd"
+
+  case $state in
+    (emaint_cmd)
+      local descr="emaint commands"
+
+      local cmd=(
+        'all:perform all supported commands that accept the specified option'
+        'logs:clean out old logs from the $PORT_LOGDIR'
+        'sync:perform sync actions on specified repositories'
+        'merges:scan for failed package merges and attempt to fix those failed packages'
+        'binhost:generate  a metadata index for binary packages located in $PKGDIR'
+        'cleanconfmem:discard no longer installed config tracker entries'
+        'cleanresume:discard merge lists saved for the emerge --resume action'
+        'movebin:perform package move updates for binary packages located in $PKGDIR'
+        'moveinst:perform package move updates for installed packages'
+        'world:fix problems in the world file'
+      )
+
+      local -a remove
+      if (( $words[(I)(-f|--fix)] )); then
+        remove=(${cmd[(r)logs:*]} ${cmd[(r)sync:*})
+      elif (( $words[(I)(-c|--check)] )); then
+        remove=(${cmd[(r)sync:*]})
+      elif (( $words[(I)(-p|--pretend|-C|--clean|-t|--time)] )); then
+        cmd=(${cmd[(r)logs:*]})
+      elif (( $words[(I)(-a|--auto|-A|--allrepos|-r=*|--repo=*|-r|--repo|--sync-submodule|--sync-submodule=*)] )); then
+        cmd=(${cmd[(r)sync:*]})
+      elif (( $words[(I)(--purge|-P)] )); then
+        cmd=(${cmd[(r)merges:*]})
+      else
+        remove=(${cmd[(r)sync:*]})
+      fi
+
+      cmd=(${cmd:|remove})
+      _describe $descr cmd
+
+      ;;
+  esac
 }
 
 _env-update () {
