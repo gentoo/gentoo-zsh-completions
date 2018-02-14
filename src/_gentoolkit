@@ -204,7 +204,7 @@ _equery () {
           {size,s}'[print size of files contained in package]'
           {uses,u}'[display USE flags for package]'
           {which,w}'[print full path to ebuild for package]'
-          {has,a}'[list all packages matching ENVIRONMENT data stored in /var/db/pkg]'
+          {has,a}'[list all installed packages where specified KEY matches the specified VALUE]'
           {keywords,y}'[display keywords for specified PKG]'
           {meta,m}'[display metadata about PKG]'
         )
@@ -357,7 +357,7 @@ _glsa_id () {
   # will be low. May be we should display only the X previous GLSA,
   # or GLSA ids of the X last month.
   #
-  # start to look at /usr/lib/gentoolkit/pym/glsa.py if GLSA_DIR is still
+  # start to look at @GENTOO_PORTAGE_EPREFIX@/usr/lib/gentoolkit/pym/glsa.py if GLSA_DIR is still
   # PORTDIR + "metadata/glsa/"
   # and then get the list (it's only xml files in GLSA_DIR, easy!)
 
