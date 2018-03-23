@@ -148,6 +148,23 @@ _eselect_news() {
   fi
 }
 
+_eselect_repository () {
+  local repositorylist
+  if (( $words[(I)(enable)] )); then
+    repositorylist=(${(f)"$(eselect --brief --color=no repository list)"})
+    _values "available repositories" $repositorylist[@] && return 0
+  elif (( $words[(I)(disable|remove)] )); then
+    repositorylist=(${(f)"$(eselect --brief --color=no repository list -i)"})
+    _values "installed repositories" $repositorylist[@] && return 0
+  fi
+  _values "eselect repository options" $common_values \
+    "add[Add a custom repository <name> <sync-type> <sync-uri>]" \
+    "disable[Disable the specified repositories]" \
+    "enable[Enable the specified repositories]" \
+    "list[List repositories]" \
+    "remove[Remove installed repositories along with their contents]" && return 0
+}
+
 _eselect () {
   local globopts modnames modopts
 
@@ -167,7 +184,7 @@ _eselect () {
       _arguments -s \
         "*:portage:_values 'eselect modules' \$modnames[@]" && return 0
     elif (( $modnames[(I)$words[2]] )); then
-      if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
+      if [[ "$words[2]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news|repository) ]]; then
         _eselect_$words[2] "$@"
       else
         modopts=(${${${(M)${(f)"$(eselect --brief --color=no $words[2] usage)"}## *}//   */}//  /})
@@ -178,7 +195,7 @@ _eselect () {
   elif ((CURRENT >= 4)); then
     if (( $words[(I)(--color=no|--colour=no)] )); then
       if (( $modnames[(I)$words[3]] )); then
-        if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news) ]]; then
+        if [[ "$words[3]" == (env|binutils|kernel|ctags|profile|fontconfig|opengl|vi|news|repository) ]]; then
           _eselect_$words[3] "$@"
         else
           modopts=(${${${${(M)${(f)"$(eselect --brief --color=no $words[3] usage)"}## *}//   */}//  /}// *})
