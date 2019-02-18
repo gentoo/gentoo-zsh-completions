@@ -11,7 +11,7 @@ _gentoo_repos() {
   overlay_paths=();
   result=();
 
-  if [[ -e /usr/share/portage/config/repos.conf || -e /etc/portage/repos.conf ]]; then
+  if [[ -e ${EPREFIX}/usr/share/portage/config/repos.conf || -e ${EPREFIX}/etc/portage/repos.conf ]]; then
     main_repo=$(_gentoo_repos_conf DEFAULT main-repo)
     main_repo_path=$(_gentoo_repos_conf ${main_repo} location)
 
@@ -19,14 +19,14 @@ _gentoo_repos() {
       overlay_paths+=($(_gentoo_repos_conf ${overlay} location))
     done
 
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/portage/make.conf 2>/dev/null
 
     overlay_paths+=(${(@)PORTDIR_OVERLAY})
   else
-    source /usr/share/portage/config/make.globals 2>/dev/null
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
+    source ${EPREFIX}/usr/share/portage/config/make.globals 2>/dev/null
+    source ${EPREFIX}/etc/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/portage/make.conf 2>/dev/null
 
     main_repo_path="${PORTDIR}"
     overlay_paths=(${(@)PORTDIR_OVERLAY})
