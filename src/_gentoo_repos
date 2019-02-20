@@ -11,22 +11,22 @@ _gentoo_repos() {
   overlay_paths=();
   result=();
 
-  if [[ -e /usr/share/portage/config/repos.conf || -e /etc/portage/repos.conf ]]; then
-    main_repo=$(_repos_conf DEFAULT main-repo)
-    main_repo_path=$(_repos_conf ${main_repo} location)
+  if [[ -e ${EPREFIX}/usr/share/portage/config/repos.conf || -e ${EPREFIX}/etc/portage/repos.conf ]]; then
+    main_repo=$(_gentoo_repos_conf DEFAULT main-repo)
+    main_repo_path=$(_gentoo_repos_conf ${main_repo} location)
 
-    for overlay in $(_repos_conf -l); do
-      overlay_paths+=($(_repos_conf ${overlay} location))
+    for overlay in $(_gentoo_repos_conf -l); do
+      overlay_paths+=($(_gentoo_repos_conf ${overlay} location))
     done
 
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/portage/make.conf 2>/dev/null
 
     overlay_paths+=(${(@)PORTDIR_OVERLAY})
   else
-    source /usr/share/portage/config/make.globals 2>/dev/null
-    source /etc/make.conf 2>/dev/null
-    source /etc/portage/make.conf 2>/dev/null
+    source ${EPREFIX}/usr/share/portage/config/make.globals 2>/dev/null
+    source ${EPREFIX}/etc/make.conf 2>/dev/null
+    source ${EPREFIX}/etc/portage/make.conf 2>/dev/null
 
     main_repo_path="${PORTDIR}"
     overlay_paths=(${(@)PORTDIR_OVERLAY})
@@ -41,50 +41,6 @@ _gentoo_repos() {
   fi
 
   echo ${(u)result}
-}
-
-_repos_conf() {
-  local v file insection section arr secname
-
-  secname=();
-
-  for file in /usr/share/portage/config/repos.conf \
-           /etc/portage/repos.conf \
-           /etc/portage/repos.conf/*.conf; do
-
-    [[ -f ${file} ]] || continue
-    insection=0
-    declare -A arr
-    IFS='= '
-
-    while read -r name value; do
-      [[ -z ${name} || ${name} == '#'* ]] && continue
-
-      if [[ (${name} == '['*']') && (-z ${value}) ]]; then
-        value=${name//(\]|\[)}
-        name="section"
-      fi
-      arr[${name}]=${value}
-
-      if [[ ${insection} == 1 && ${name} == "section" ]]; then
-        break
-      elif [[ ${name} == "section" ]]; then
-        [[ ${value} == ${1} ]] && insection=1
-        secname+=(${value})
-      elif [[ ${insection} == 1 ]]; then
-        if [[ ${name} == ${2} ]]; then
-          v=${value}
-        fi
-      fi
-      continue
-    done < ${file}
-  done
-
-  if [[ ${1} == "-l" ]]; then
-    echo "${(@u)secname}"
-  else
-    echo "${v}"
-  fi
 }
 
 _gentoo_repos "$@"

@@ -1,0 +1,55 @@
+#autoload
+
+# Usage:
+#   _gentoo_repos_conf -l             -> returns the list of all repos names
+#   _gentoo_repos_conf REPO ATTRIBUTE -> returns the VALUE associated 
+#                                        with the ATTRIBUTE of the REPO
+
+_gentoo_repos_conf() {
+  local v file insection section arr secname
+
+  secname=();
+
+
+  for file in ${EPREFIX}/usr/share/portage/config/repos.conf \
+           ${EPREFIX}/etc/portage/repos.conf \
+           ${EPREFIX}/etc/portage/repos.conf/*.conf; do
+
+    [[ -f ${file} ]] || continue
+    insection=0
+    declare -A arr
+    IFS='= '
+
+    while read -r name value; do
+      [[ -z ${name} || ${name} == '#'* ]] && continue
+
+      if [[ (${name} == '['*']') && (-z ${value}) ]]; then
+        value=${name//(\]|\[)}
+        name="section"
+      fi
+      arr[${name}]=${value}
+
+      if [[ ${insection} == 1 && ${name} == "section" ]]; then
+        break
+      elif [[ ${name} == "section" ]]; then
+        [[ ${value} == ${1} ]] && insection=1
+        secname+=(${value})
+      elif [[ ${insection} == 1 ]]; then
+        if [[ ${name} == ${2} ]]; then
+          v=${value}
+        fi
+      fi
+      continue
+    done < ${file}
+  done
+
+  if [[ ${1} == "-l" ]]; then
+    echo "${(@u)secname}"
+  else
+    echo "${v}"
+  fi
+}
+
+_gentoo_repos_conf "$@"
+
+# vim: set et sw=2 ts=2 ft=zsh:

@@ -58,7 +58,7 @@ _parsesetsconf() {
 
 _gentoo_packages_update_installed_sets() {
   local sets
-  sets=($(</var/lib/portage/world_sets))
+  sets=($(<${EPREFIX}/var/lib/portage/world_sets))
   if [[ ((${#sets} > 0)) ]]; then
      _wanted installed_sets expl 'installed set' compadd "$@" "${(o@)^sets}"
   fi
@@ -67,7 +67,7 @@ _gentoo_packages_update_installed_sets() {
 _gentoo_packages_update_available_sets() {
   local dirs dir sets_dir set sets sets_path sets_files
 
-  dirs=($(_gentoo_repos -o) /etc/portage /usr/share/portage/config)
+  dirs=($(_gentoo_repos -o) ${EPREFIX}/etc/portage ${EPREFIX}/usr/share/portage/config)
 
   for dir in ${(@)dirs}; do
     if [[ -d ${dir} ]]; then
@@ -104,10 +104,10 @@ _gentoo_packages_update_useflag(){
 _gentoo_packages_update_active_useflag(){
   local flags USE
   var=USE
-  [[ -z ${(P)var} && -r /etc/portage/make.conf ]] &&
-    local $var="$(. /etc/portage/make.conf 2>/dev/null; echo ${(P)var})"
-  [[ -z ${(P)var} && -r /etc/make.conf ]] &&
-    local $var="$(. /etc/make.conf 2>/dev/null; echo ${(P)var})"
+  [[ -z ${(P)var} && -r ${EPREFIX}/etc/portage/make.conf ]] &&
+    local $var="$(. ${EPREFIX}/etc/portage/make.conf 2>/dev/null; echo ${(P)var})"
+  [[ -z ${(P)var} && -r ${EPREFIX}/etc/make.conf ]] &&
+    local $var="$(. ${EPREFIX}/etc/make.conf 2>/dev/null; echo ${(P)var})"
   flags=(${${${=USE}%-*}%\\*})
   compadd $flags
 }
@@ -122,7 +122,7 @@ _gentoo_packages_update_category(){
 
 _gentoo_packages_update_installed(){
    local installed_dir installed_portage installed_pkgname installed_list
-   installed_dir="/var/db/pkg"
+   installed_dir="${EPREFIX}/var/db/pkg"
    installed_portage=($installed_dir/*-*/*)
 
    installed_pkgname=(${${installed_portage:t}%%-[0-9]*})
@@ -135,7 +135,7 @@ _gentoo_packages_update_installed(){
 _gentoo_packages_update_installed_versions(){
   local installed_list installed_portage
 
-  installed_portage=(/var/db/pkg/*-*/*)
+  installed_portage=(${EPREFIX}/var/db/pkg/*-*/*)
   _wanted packages expl 'package' compadd "$@" ${installed_portage:t}
 
   installed_list=(${installed_portage##*/pkg/})
@@ -196,12 +196,12 @@ _gentoo_packages_update_available_versions(){
 _gentoo_packages_update_binary() {
   local PKGDIR
 
-  [[ -z $PKGDIR && -r /etc/portage/make.conf ]] &&
-    PKGDIR="$(. /etc/portage/make.conf 2>/dev/null; echo $PKGDIR)"
-  [[ -z $PKGDIR && -r /etc/make.conf ]] &&
-    PKGDIR="$(. /etc/make.conf 2>/dev/null; echo $PKGDIR)"
-  [[ -z $PKGDIR && -r /usr/share/portage/config/make.globals ]] &&
-    PKGDIR="$(. /usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR)"
+  [[ -z $PKGDIR && -r ${EPREFIX}/etc/portage/make.conf ]] &&
+    PKGDIR="$(. ${EPREFIX}/etc/portage/make.conf 2>/dev/null; echo $PKGDIR)"
+  [[ -z $PKGDIR && -r ${EPREFIX}/etc/make.conf ]] &&
+    PKGDIR="$(. ${EPREFIX}/etc/make.conf 2>/dev/null; echo $PKGDIR)"
+  [[ -z $PKGDIR && -r ${EPREFIX}/usr/share/portage/config/make.globals ]] &&
+    PKGDIR="$(. ${EPREFIX}/usr/share/portage/config/make.globals 2>/dev/null; echo $PKGDIR)"
 
   # this doesn't take care of ${PORTAGE_BINHOST}. If Gentoo official
   # binary mirror will be available we should rewrite it accordingly.
