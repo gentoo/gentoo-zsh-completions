@@ -7,8 +7,11 @@ _eselect_parse_generic() {
   local mod descr etype
 
   eselect_args=($@)
+  if [[ $1 == "modules" ]] ; then
+    eselect_args=($1 usage)
+  fi
   mod_cur="mod_extra"
-  eselect_descr="$(LANG=C COLUMNS=100 eselect --colour=no $eselect_args 2> /dev/null)"
+  eselect_descr="$(LANG=C COLUMNS=100 eselect --colour=no ${eselect_args[@]} 2> /dev/null)"
 
   while IFS="" read -r helpdesc ; do
     case "$helpdesc" in
@@ -36,15 +39,16 @@ _eselect_parse_generic() {
   if [[ -z "${mod_extra}" && -z "${mod_std}" ]] ; then
     _nothing
   else
-    _describe  -V "eselect extra $etype"    mod_extra
-    _describe -1V "eselect standard $etype" mod_std
+    _describe -t eselect_extra    -V "eselect extra $etype"    mod_extra
+    _describe -t eselect_standard -V "eselect standard $etype" mod_std
   fi
 }
 
 _eselect_parse_action_list() {
   local eselect_list
   local idx descr
-  local arr_items=$2
+  local arr_items_selected=$2
+  local arr_items_unselected=$3
 
   eselect_list="$(LANG=C COLUMNS=100 eselect --colour=no $1 list 2> /dev/null)"
   while IFS="" read -r ele ; do
@@ -52,11 +56,15 @@ _eselect_parse_action_list() {
     idx=${idx#*\[}
     idx=${idx%\]*}
     if [[ "$idx" =~ '^[0-9]+$' ]]; then
-      set -A $arr_items ${(P)arr_items} $idx:${(q)descr}
+      local stripped_descr="${descr% *\**}"
+      if [[ "${stripped_descr}" != "${descr}" ]] ; then
+        set -A $arr_items_selected ${(P)arr_items_selected} "$idx:${(q)descr}"
+      else
+        set -A $arr_items_unselected ${(P)arr_items_unselected} "$idx:${(q)descr}"
+      fi
     fi
   done <<< "$eselect_list"
 }
-
 
 _eselect_module_action() {
   if (( $+functions[_eselect_${1}_action] )) ; then
@@ -103,16 +111,28 @@ _eselect_module() {
 }
 
 _eselect_complete_action_generic() {
-  local -a items
+  local -a sel_items
+  local -a unsel_items
 
   if (( $NORMARG + $(_eselect_action_index) == $CURRENT )) ; then
     case "$(_eselect_get_action)" in
-      ("set"|"enable"|"disable"))
-        _eselect_parse_action_list $1 items
-        if [[ -n "${items[@]}" ]] ; then
-          _describe  -V 'eselect items' items
+      ("set"|"enable"))
+        _eselect_parse_action_list $1 sel_items unsel_items
+          if (( $#unsel_items + $#sel_items > 0 )) ; then
+          _describe -t eselect_sel   -V 'eselect items' unsel_items
+          if (( $#unsel_items + $#sel_items < 10 )) ; then
+            _describe -t eselect_unsel -V 'eselect already selected items' sel_items
+          fi
           return 0
         fi
+        ;;
+      ("remove"|"disable"))
+        _eselect_parse_action_list $1 sel_items unsel_items
+        if [[ -n "${sel_items[@]}" ]] ; then
+          _describe  -V 'eselect items' sel_items
+          return 0
+        fi
+        ;;
     esac
   fi
 
@@ -129,7 +149,7 @@ _eselect_complete_action_generic() {
       if [[ $(_eselect_get_action) == "read" ]] ; then
         extra_items=('new:Read unread news items (default)' "${extra_items[@]}")
       fi
-      _eselect_parse_action_list news items
+      _eselect_parse_action_list news items items
 
       items=(${(q)extra_items[@]} ${(Oa)items})
       if [[ -n "${items[@]}" ]] ; then
