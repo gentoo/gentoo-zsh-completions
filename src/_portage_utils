@@ -98,7 +98,7 @@ case $service in
       {'(--repo)-R','(-R)--repo'}'[Display installed packages with repository]' \
       {'(--umap)-U','(-U)--umap'}'[Display installed packages with flags used]' \
       {'(--columns)-c','(-c)--columns'}'[Display column view]' \
-      '--show-debug[Show /usr/lib/debug files]' \
+      '--show-debug[Show debug files]' \
       {'(--exact)-e','(-e)--exact'}'[Exact match (only CAT/PN or PN without PV)]' \
       {'(--all)-a','(-a)--all'}'[Show every installed package]' \
       {'(--dir)-d','(-d)--dir'}'[Only show directories]' \
@@ -115,7 +115,7 @@ case $service in
       {'(--unlist)-u','(-u)--unlist'}'[Show unmerge history]' \
       {'(--sync)-s','(-s)--sync'}'[Show sync history]' \
       {'(--current)-c','(-c)--current'}'[Show current emerging packages]' \
-      {'(--logfile)-f','(-f)--logfile'}'[Read emerge logfile instead of /var/log/emerge.log]:log:_files' \
+      {'(--logfile)-f','(-f)--logfile'}'[Read emerge logfile instead of $EMERGE_LOG_DIR/emerge.log]:log:_files' \
       '*:packages:_gentoo_packages available'
     ;;
   qsearch)
