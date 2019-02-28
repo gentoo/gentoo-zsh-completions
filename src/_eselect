@@ -45,25 +45,24 @@ _eselect_parse_generic() {
 }
 
 _eselect_parse_action_list() {
-  local eselect_list
-  local idx descr
-  local arr_items_selected=$2
-  local arr_items_unselected=$3
+  local idx item tag
+  local -a _sel_items
+  local -a _unsel_items
 
-  eselect_list="$(LANG=C COLUMNS=100 eselect --colour=no $1 list 2> /dev/null)"
-  while IFS="" read -r ele ; do
-    echo "$ele" | read idx descr
-    idx=${idx#*\[}
-    idx=${idx%\]*}
-    if [[ "$idx" =~ '^[0-9]+$' ]]; then
-      local stripped_descr="${descr% *\**}"
-      if [[ "${stripped_descr}" != "${descr}" ]] ; then
-        set -A $arr_items_selected ${(P)arr_items_selected} "$idx:${(q)descr}"
-      else
-        set -A $arr_items_unselected ${(P)arr_items_unselected} "$idx:${(q)descr}"
-      fi
+  while read idx item tag ; do
+    if [[ "$idx" == '[' && "$item" == ']' ]] ; then
+      continue
     fi
-  done <<< "$eselect_list"
+    if [[ -z "$tag" ]] ; then
+      _unsel_items+=($item)
+    else
+      _sel_items+=($item)
+    fi
+  done <<< $(LANG=C COLUMNS=100 eselect --colour=no $1 list 2> /dev/null | tail -n +2)
+
+  set -A $2 ${_sel_items[@]}
+  set -A $3 ${_unsel_items[@]}
+
 }
 
 _eselect_module_action() {
@@ -78,9 +77,15 @@ _eselect_complete_action() {
   local actionname=$(_eselect_get_module)
   if (( $+functions[_eselect_complete_${actionname}_action] )) ; then
     _eselect_complete_${actionname}_action
-  else
-    _eselect_complete_action_generic ${actionname}
+    return 0
   fi
+
+  if (( $NORMARG + $(_eselect_action_index) == $CURRENT )) ; then
+    _eselect_complete_action_generic ${actionname}
+    return 0
+  fi
+
+  _nothing
 }
 
 _eselect_get_module() {
@@ -110,31 +115,29 @@ _eselect_module() {
   _eselect_parse_generic
 }
 
-_eselect_complete_action_generic() {
+(( $+function[_eselect_complete_action_generic] )) || _eselect_complete_action_generic() {
   local -a sel_items
   local -a unsel_items
 
-  if (( $NORMARG + $(_eselect_action_index) == $CURRENT )) ; then
-    case "$(_eselect_get_action)" in
-      ("set"|"enable"))
-        _eselect_parse_action_list $1 sel_items unsel_items
-          if (( $#unsel_items + $#sel_items > 0 )) ; then
-          _describe -t eselect_sel   -V 'eselect items' unsel_items
-          if (( $#unsel_items + $#sel_items < 10 )) ; then
-            _describe -t eselect_unsel -V 'eselect already selected items' sel_items
-          fi
-          return 0
+  case "$(_eselect_get_action)" in
+    ("set"|"enable"))
+      _eselect_parse_action_list $1 sel_items unsel_items
+      if (( $#unsel_items + $#sel_items > 0 )) ; then
+        _describe -t eselect_sel   -V 'eselect items' unsel_items
+        if (( $#unsel_items + $#sel_items < 10 )) ; then
+          _describe -t eselect_unsel -V 'eselect already selected items' sel_items
         fi
-        ;;
-      ("remove"|"disable"))
-        _eselect_parse_action_list $1 sel_items unsel_items
-        if [[ -n "${sel_items[@]}" ]] ; then
-          _describe  -V 'eselect items' sel_items
-          return 0
-        fi
-        ;;
-    esac
-  fi
+        return 0
+      fi
+      ;;
+    ("remove"|"disable"))
+      _eselect_parse_action_list $1 sel_items unsel_items
+      if [[ -n "${sel_items[@]}" ]] ; then
+        _describe  -V 'eselect items' sel_items
+        return 0
+      fi
+      ;;
+  esac
 
   _nothing
 }
@@ -145,15 +148,19 @@ _eselect_complete_action_generic() {
 
   case "$(_eselect_get_action)" in
     ("read"|"unread"))
-      local -a extra_items=('all:Read all news items')
+      items=('all:Read all news items')
       if [[ $(_eselect_get_action) == "read" ]] ; then
-        extra_items=('new:Read unread news items (default)' "${extra_items[@]}")
+        items+=('new:Read unread news items (default)' "${extra_items[@]}")
       fi
-      _eselect_parse_action_list news items items
 
-      items=(${(q)extra_items[@]} ${(Oa)items})
+      local idx descr
+      while read idx descr ; do
+        idx=${idx#'['}
+        idx=${idx%']'}
+        items+=(${idx}:${(q)descr})
+      done <<< $(eselect --colour=no news list 2> /dev/null | tail -n +2)
       if [[ -n "${items[@]}" ]] ; then
-        _describe  -V 'eselect items' items
+        _describe  -V 'eselect news' items
         return 0
       fi
       ;;
@@ -228,6 +235,10 @@ _eselect_complete_action_generic() {
   fi
 
   _nothing
+}
+
+(( $+functions[_eselect_complete_repository_action] )) || _eselect_complete_repository_action() {
+  _eselect_complete_action_generic repository
 }
 
 eselect_comp() {
