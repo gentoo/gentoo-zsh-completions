@@ -148,17 +148,17 @@ _eselect_module() {
 
   case "$(_eselect_get_action)" in
     ("read"|"unread"))
-      items=('all:Read all news items')
-      if [[ $(_eselect_get_action) == "read" ]] ; then
-        items+=('new:Read unread news items (default)' "${extra_items[@]}")
-      fi
-
       local idx descr
       while read idx descr ; do
         idx=${idx#'['}
         idx=${idx%']'}
-        items+=(${idx}:${(q)descr})
+        items=(${idx}:${(q)descr} ${items[@]})
       done <<< $(eselect --colour=no news list 2> /dev/null | tail -n +2)
+      items+=('all:Read all news items')
+      if [[ $(_eselect_get_action) == "read" ]] ; then
+        items+=('new:Read unread news items (default)')
+      fi
+
       if [[ -n "${items[@]}" ]] ; then
         _describe  -V 'eselect news' items
         return 0
