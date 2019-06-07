@@ -237,6 +237,31 @@ _eselect_module() {
   _nothing
 }
 
+(( $+functions[_eselect_complete_rc_action] )) || _eselect_complete_rc_action() {
+  if (( $NORMARG + $(_eselect_action_index) == $CURRENT )) ; then
+    case "$(_eselect_get_action)" in
+      ("list"|"show"))
+        _values 'runlevels' $(command ls --color=never ${EPREFIX}/etc/runlevels)
+        return 0
+        ;;
+      ("add"|"delete"|"pause"|"reload"|"restart"|"start"|"stop"))
+        _values 'scripts' $(rc-service -l)
+        return 0
+        ;;
+      esac
+  elif (( $NORMARG + $(_eselect_action_index) + 1 == $CURRENT )) ; then
+    case "$words[$CURRENT-2]" in
+      ("add"|"delete")
+        _values 'runlevels' $(command ls --color=never ${EPREFIX}/etc/runlevels)
+        return 0
+        ;;
+    esac
+  fi
+
+  _nothing
+}
+
+
 (( $+functions[_eselect_complete_repository_action] )) || _eselect_complete_repository_action() {
   _eselect_complete_action_generic repository
 }
