@@ -147,6 +147,14 @@ case $service in
       '--debug[Run shell funcs with `set -x`]' \
       '*:packages:_gentoo_packages available'
     ;;
+  qpkg)
+    _arguments -s $common_args \
+      {'(--clean)-c','(-c)--clean'}'[clean pkgdir of unused binary files]' \
+      {'(--eclean)-E','(-E)--eclean'}'[clean pkgdir of files not in the tree anymore (slow)]' \
+      {'(--pretend)-p','(-p)--pretend'}'[pretend only]' \
+      {'(--pkgdir)-P','(-P)--pkgdir'}'[alternate package directory]:alternate pkgdir:_files -/' \
+      '*:Installed packages:_gentoo_packages installed_versions'
+    ;;
   qsearch)
     _arguments -s $common_args \
       {'(--all)-a','(-a)--all'}'[List the descriptions of every package in the cache]' \
@@ -170,6 +178,15 @@ case $service in
       {'(--format)-F','(-F)--format'}'[Print matched atom using given format string]:format' \
       '*:packages:_gentoo_packages installed'
     ;;
+  qtbz2)
+    _arguments -s $common_args \
+      {'(--dir)-d','(-d)--dir'}'[Change to specified directory]:directory:_files -/' \
+      {'(--join)-j','(-j)--join'}'[Join tar.bz2 + xpak into a tbz2]:*:tar.bz2 file and xpak file:_files -g \*.\(tar.bz2\|xpak\)' \
+      {'(--split)-s','(-s)--split'}'[Split a tbz2 into a tar.bz2 + xpak]:tbz2 file:_files -g \*.tbz2' \
+      {'(--tarbz2)-t','(-t)--tarbz2'}'[Just split the tar.bz2]:tbz2 file:_files -g \*.tbz2' \
+      {'(--xpak)-x','(-x)--xpak'}'[Just split the xpak]:tbz2 file:_files -g \*.tbz2' \
+      {'(--stdout)-O','(-O)--stdout'}'[Write files to stdout]'
+    ;;
   quse)
     _arguments -s $common_args \
       {'(--exact)-e','(-e)--exact'}'[Show exact non regexp matching using strcmp]' \
@@ -181,23 +198,6 @@ case $service in
       {'(--repo)-R','(-R)--repo'}'[Show repository the ebuild originates from]' \
       {'(--format)-F','(-F)--format'}'[Print matched atom using given format string]:format' \
       '*:use flag:_gentoo_packages useflag'
-    ;;
-  qtbz2)
-    _arguments -s $common_args \
-      {'(--dir)-d','(-d)--dir'}'[Change to specified directory]:directory:_files -/' \
-      {'(--join)-j','(-j)--join'}'[Join tar.bz2 + xpak into a tbz2]:*:tar.bz2 file and xpak file:_files -g \*.\(tar.bz2\|xpak\)' \
-      {'(--split)-s','(-s)--split'}'[Split a tbz2 into a tar.bz2 + xpak]:tbz2 file:_files -g \*.tbz2' \
-      {'(--tarbz2)-t','(-t)--tarbz2'}'[Just split the tar.bz2]:tbz2 file:_files -g \*.tbz2' \
-      {'(--xpak)-x','(-x)--xpak'}'[Just split the xpak]:tbz2 file:_files -g \*.tbz2' \
-      {'(--stdout)-O','(-O)--stdout'}'[Write files to stdout]'
-    ;;
-  qpkg)
-    _arguments -s $common_args \
-      {'(--clean)-c','(-c)--clean'}'[clean pkgdir of unused binary files]' \
-      {'(--eclean)-E','(-E)--eclean'}'[clean pkgdir of files not in the tree anymore (slow)]' \
-      {'(--pretend)-p','(-p)--pretend'}'[pretend only]' \
-      {'(--pkgdir)-P','(-P)--pkgdir'}'[alternate package directory]:alternate pkgdir:_files -/' \
-      '*:Installed packages:_gentoo_packages installed_versions'
     ;;
   qxpak)
     _arguments -s $common_args \
