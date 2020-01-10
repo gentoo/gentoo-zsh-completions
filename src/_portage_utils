@@ -93,7 +93,7 @@ case $service in
       {'(--not)-n','(-n)--not'}"[list packages that aren't keyworded on a given arch]"
 
       _describe -t available-arches "arch" arches
-
+    ;;
   qlist)
     _arguments -s $common_args \
       {'(--installed)-I','(-I)--installed'}'[Just show installed packages]' \
@@ -199,10 +199,10 @@ case $service in
       {'(--license)-L','(-L)--license'}'[Use the LICENSE vs IUSE]' \
       {'(--describe)-D','(-D)--describe'}'[Describe the USE flag]' \
       {'(--installed)-I','(-I)--installed'}'[Only search installed packages]' \
-      {'(--package)-p','(-p)--package'}'[Restrict matching to package or category]:package:gentoo_packages available'
+      {'(--package)-p','(-p)--package'}'[Restrict matching to package or category]:package:gentoo_packages available' \
       {'(--repo)-R','(-R)--repo'}'[Show repository the ebuild originates from]' \
       {'(--format)-F','(-F)--format'}'[Print matched atom using given format string]:format' \
-      '*:use flag:_gentoo_packages useflag'
+      '*:useflag:_gentoo_packages useflag'
     ;;
   qxpak)
     _arguments -s $common_args \
