@@ -134,7 +134,7 @@ case $service in
     _arguments -s $common_args \
       {'(--generate)-g','(-g)--generate'}'[Generate thick Manifests]' \
       {'(--signas)-s','(-s)--signas'}'[Sign generated Manifest using GPG key]:public key:_gpg public-keys' \
-      {'(--passphrase)-p','{-p}--passphrase'}'[Ask for GPG key password (instead of relying on gpg-agent)]' \
+      {'(--passphrase)-p','(-p)--passphrase'}'[Ask for GPG key password (instead of relying on gpg-agent)]' \
       {'(--dir)-d','(-d)--dir'}'[Tread arguments as directories]:directory:_files -/' \
       {'(--overlay)-o','(-o)--overlay'}'[Treat arguments as overlay names]:overlay:_gentoo_repos -o' \
     ;;
