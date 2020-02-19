@@ -49,14 +49,14 @@ _eselect_parse_action_list() {
   local -a _sel_items
   local -a _unsel_items
 
-  while read idx item tag ; do
+  while read idx item tag descr ; do
     if [[ "$idx" == '[' && "$item" == ']' ]] ; then
       continue
     fi
-    if [[ -z "$tag" ]] ; then
-      _unsel_items+=($item)
-    else
+    if [[ ${tag} =~ '^[*@#]$' ]] ; then
       _sel_items+=($item)
+    else
+      _unsel_items+=($item)
     fi
   done <<< $(LANG=C COLUMNS=100 eselect --colour=no $1 list 2> /dev/null | tail -n +2)
 
@@ -251,7 +251,7 @@ _eselect_module() {
       esac
   elif (( $NORMARG + $(_eselect_action_index) + 1 == $CURRENT )) ; then
     case "$words[$CURRENT-2]" in
-      ("add"|"delete")
+      ("add"|"delete"))
         _values 'runlevels' $(command ls --color=never ${EPREFIX}/etc/runlevels)
         return 0
         ;;
@@ -263,6 +263,18 @@ _eselect_module() {
 
 
 (( $+functions[_eselect_complete_repository_action] )) || _eselect_complete_repository_action() {
+  local -a opts
+
+  case "$(_eselect_get_action)" in
+    ("disable"|"remove"))
+      opts=('-f:Force potentially dangerous removals')
+      ;;
+    "list")
+      opts=('-i:Only list installed')
+      ;;
+  esac
+
+  _describe -o 'options' opts
   _eselect_complete_action_generic repository
 }
 
