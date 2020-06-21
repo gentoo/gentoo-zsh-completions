@@ -46,7 +46,7 @@ actions_args=(
   "($actions --add -a)"{--add,-a}'[Add the given overlay to your installed overlays]:overlay:_layman_remote_overlays'
   "($actions --priority -p)"{--priority,-p}'[It will modify the priority of the added overlay]:priority:({0..100})'
   "($actions $add_actions)"{--delete,-d}'[Delete the given overlay from your installed overlays]:overlay:_layman_local_overlays'
-  "($actions $add_actions)"{--sync,-s}'[Update the specified overlay]:overlat:_layman_local_overlays'
+  "($actions $add_actions)"{--sync,-s}'[Update the specified overlay]:overlay:_layman_local_overlays'
   "($actions $add_actions)"{--info,-i}'[Display all available information about the specified overlay]:overlay:_layman_remote_overlays'
   "($actions $add_actions)"{--sync-all,-S}'[Update all overlays]'
   "($actions $add_actions)"{--list,-L}'[List the contents of the remote list]'
