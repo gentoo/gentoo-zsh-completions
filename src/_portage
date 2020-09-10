@@ -307,7 +307,7 @@ _emaint () {
 
       local -a remove
       if (( $words[(I)(-f|--fix)] )); then
-        remove=(${cmd[(r)logs:*]} ${cmd[(r)sync:*})
+        remove=(${cmd[(r)logs:*]} ${cmd[(r)sync:*]})
       elif (( $words[(I)(-c|--check)] )); then
         remove=(${cmd[(r)sync:*]})
       elif (( $words[(I)(-p|--pretend|-C|--clean|-t|--time)] )); then
