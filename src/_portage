@@ -3,10 +3,11 @@
 _ebuild () {
   local state
   local expl=(-Vx)
+  local yesno="yes/no:compadd -o nosort y n"
   local optional_args=(
     '--skip-manifest[skip all manifest checks]'
     '--debug[run bash with the -x option]'
-    '--color=[enable or disable  color  output]:yes/no:((y\:yes n\:no))'
+    '--color=[enable or disable  color  output]'":$yesno"
     '--ignore-default-opts[ignore $EBUILD_DEFAULT_OPTS]'
     '--force[forces regeneration all associated distfiles if used with digest or or manifest command]'
   )
@@ -97,6 +98,7 @@ _emerge () {
     -u --update -U --upgradeonly --config
   )
 
+  local yesno="yes/no:compadd -o nosort y n"
   common_args=(
     "($noask_opts --sync)"{-p,--pretend}"[Simply display what would be done]"
     "($noask_opts)"{-a,--ask}"[Ask what would be done]"
@@ -107,7 +109,7 @@ _emerge () {
     '(: -)'{-h,--help}'[Displays help]'
     "(: -)--config[Run package specific actions needed to be executed after the emerge process has completed]:installed atom:_gentoo_packages installed"
     "(: -)--list-sets[Displays a list of available package sets]"
-    "--color=[Color output]:yes/no:((y\:'yes' n\:'no'))"
+    "--color=[Color output]:$yesno"
     "--accept-properties=[Temporarily override the ACCEPT_PROPERTIES variable]"
     "--accept-restrict=[Temporarily override the ACCEPT_RESTRICT variable]"
     "($noask_opts)"{-A,--alert}"[Add a terminal bell to all interactive prompts]"
@@ -126,18 +128,18 @@ _emerge () {
     "--autounmask-write[Automatically write autounmask changes (respect CONFIG_PROTECT)]"
     "--backtrack=[Number of times to backtrack if dependency calculation fails]:number:(0 10 30)"
     "--binpkg-respect-use[Ignore binary packages if their uses don't match current config]"
-    "--complete-graph[Consider the deep dependencies of all packages from the world set]"
-    "--complete-graph-if-new-use[--complete-graph if USE or IUSE will change for an installed package]"
-    "--complete-graph-if-new-ver[--complete-graph if an installed package version will change]"
+    "--complete-graph[Consider the deep dependencies of all packages from the world set]:$yesno"
+    "--complete-graph-if-new-use[--complete-graph if USE or IUSE will change for an installed package]:$yesno"
+    "--complete-graph-if-new-ver[--complete-graph if an installed package version will change]:$yesno"
     "--config-root=[Set PORTAGE_CONFIGROOT variable]:root path:_files -/"
     "--depclean-lib-check[Check library link-level dependencies]"
     "--digest[Prevent corruption from being noticed]"
-    "--dynamic-deps[Substitute the dependencies of installed packages with the dependencies of corresponding unbuilt ebuilds]"
+    "--dynamic-deps[Substitute the dependencies of installed packages with the dependencies of corresponding unbuilt ebuilds]:$yesno"
     "--fail-clean[Clean up temporary files after a build failure]"
-    "--ignore-built-slot-operator-deps[Ignore the slot/sub-slot dependencies for built pkg]"
+    "--ignore-built-slot-operator-deps[Ignore the slot/sub-slot dependencies for built pkg]:$yesno"
     "--keep-going[Continue as much as possible after an error]"
     "--load-average[No new builds should be started if there are other builds running and the load average is at least VALUE]"
-    "--misspell-suggestions[Enable or disable misspell suggestions]"
+    "--misspell-suggestions[Enable or disable misspell suggestions]:$yesno"
     "--newrepo[Recompile a package if it is now being pulled from a different repository]"
     "--usepkg-exclude[Ignore matching binary packages]:installed atom:_gentoo_packages installed"
     "--rebuild-exclude[Do not rebuild matching packages on --rebuild]:installed atom:_gentoo_packages installed"
@@ -159,7 +161,7 @@ _emerge () {
     "--reinstall-atoms[Treat matching packages as if they are not installed]:installed atoms:_gentoo_packages installed"
     "--root=[Set ROOT env variable]:prefix path:_files -/"
     "(: $nopkg_opts)"{-w,--select}"[Add specified packages to the world set (inverse of --oneshot)]"
-    "--selective=[Use --selective=n if you want to forcefully disable --selective, regardless of options like --changed-use, --newuse, --noreplace, or --update]:yes/no:((y\:'yes' n\:'no'))"
+    "--selective=[Use --selective=n if you want to forcefully disable --selective, regardless of options like --changed-use, --newuse, --noreplace, or --update]:$yesno"
     "--unordered-display[Produce more readable package tree with --tree]"
     "--use-ebuild-visibility[Use unbuilt ebuild metadata for visibility checks on built packages]"
     "--useoldpkg-atoms[Prefer matching binary packages over newer unbuilt packages]:available atom:_gentoo_packages available"
@@ -204,8 +206,8 @@ _emerge () {
     "(: $all[3,-1])--resume[Resumes the last merge operation]"
     "(: $all[3,-1])--skipfirst[Removes the first package in the resume list]"
     "($all)--keep-going[Continue merge even if a package fails to build]"
-    "--with-bdeps=[pull in build time dependencies  that  are  not  strictly  required]:yes/no:((y\:'yes' n\:'no'))"
-    "--with-test-deps=[pull in dependencies that are conditional  on  the \"testUSE flag]:yes/no:((y\:'yes' n\:'no'))"
+    "--with-bdeps=[pull in build time dependencies  that  are  not  strictly  required]:$yesno"
+    "--with-test-deps=[pull in dependencies that are conditional  on  the \"testUSE flag]:$yesno"
   )
 
   profiles=(
