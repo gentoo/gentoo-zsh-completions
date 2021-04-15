@@ -129,6 +129,7 @@ _emerge () {
     "--backtrack=[Number of times to backtrack if dependency calculation fails]:number:(0 10 30)"
     "--binpkg-changed-deps[Ignore binary packages for which the corresponding ebuild dependencies have changed since the packages were built]:$yesno"
     "--binpkg-respect-use[Ignore binary packages if their uses don't match current config]"
+    "--changed-deps[Replace installed packages whos dependencies have changed since install]"
     "--complete-graph[Consider the deep dependencies of all packages from the world set]:$yesno"
     "--complete-graph-if-new-use[--complete-graph if USE or IUSE will change for an installed package]:$yesno"
     "--complete-graph-if-new-ver[--complete-graph if an installed package version will change]:$yesno"
