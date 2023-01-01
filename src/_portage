@@ -93,9 +93,9 @@ _emerge () {
   )
 
   all=(
-    $bopts -l --changelog --columns --deep -D --emptytree -e --newuse
+    $bopts -l --changelog --columns --deep -D --emptytree -e --newuse -N
     --noconfmem --nodeps -O --noreplace -n --oneshot -1 -o --onlydeps --tree -t
-    -u --update -U --upgradeonly --config
+    -u --update --changed-use -U --config
   )
 
   local yesno="yes/no:compadd -o nosort y n"
@@ -177,9 +177,9 @@ _emerge () {
     "($bopts)"{-B,--buildpkgonly}"[Tells emerge to only build binary packages]"
     "($nopkg_opts --emptytree -e -l --changelog --usepkgonly -K)"{-l,--changelog}"[This will show the ChangeLog]"
     "($nopkg_opts -t --tree)--columns[Displays versions in aligned format]"
-    "($nopkg_opts -D --deep --newuse -N --changed-use)"{-D,--deep}"[Consider the entire dependency tree of packages]"
-    "($nopkg_opts -D --deep --newuse -N --changed-use)"{-N,--newuse}"[Include installed packages where any USE flags have changed since compilation.]"
-    "($nopkg_opts -D --deep --newuse -N --changed-use)--changed-use[Include installed packages where enabled USE flags have changed since installation]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use -U)"{-D,--deep}"[Consider the entire dependency tree of packages]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use -U)"{-N,--newuse}"[Include installed packages where any USE flags have changed since compilation.]"
+    "($nopkg_opts -D --deep --newuse -N --changed-use -U)"{-U,--changed-use}"[Include installed packages where enabled USE flags have changed since installation]"
     "($nopkg_opts -e -l --changelog --emptytree)"{-e,--emptytree}"[Only consider glibc as installed packages]"
     "($all --nospinner --pretend -p)"{-i,--inject}"[Portage thinks that this package is installed]"
     "($nopkg_opts $bopts)"{-f,--fetchonly}"[Just perform fetches for all packages]"
@@ -194,7 +194,6 @@ _emerge () {
     "($nopkg_opts --onlydeps-with-rdeps)--onlydeps-with-rdeps[Include run time dependencies when --onlydeps is specified]:$yesno"
     "($nopkg_opts --columns -t --tree)"{-t,--tree}"[Show dependency tree]"
     "($nopkg_opts --update -u)"{-u,--update}"[Updates packages to the most recent version available]"
-    "($nopkg_opts --upgradeonly -U)"{-U,--upgradeonly}"[Do not update packages to a lower version]"
     "($bopts)"{-k,--usepkg}"[Tells emerge to use binary packages if available]"
     "($bopts --changelog -l)"{-K,--usepkgonly}"[Tells emerge to use binary packages only]"
     "($all)--clean[Cleans the system by removing packages]"
